@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f4f4f4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="CrossFit Tools">
+<link rel="manifest" href="./manifest.webmanifest">
+<title>CrossFit Tools</title>
+<style>
+:root{--bg:#f4f4f4;--card:#fff;--text:#171717;--muted:#6b6b6b;--line:#d8d8d8;--accent:#222;--good:#1f7a3d}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.container{max-width:860px;margin:auto;padding:16px 16px 36px}
+header{padding:12px 0 4px;display:flex;justify-content:space-between;gap:12px;align-items:center}
+h1{font-size:28px;margin:0}.subtitle{color:var(--muted);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.home-tool{min-height:135px;border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px;text-align:left}
+.home-tool .icon{font-size:30px}.home-tool strong{display:block;font-size:18px;margin-top:12px}.home-tool span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+.navbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.navbtn,.choice,.secondary,.plateButton{border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 12px;font-weight:700}
+.navbtn.active,.choice.active,.primary{background:#222;color:#fff;border-color:#222}
+.primary{width:100%;border:0;border-radius:9px;padding:13px;font-weight:800}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.section-title{display:block;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
+.input,select,textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px;background:#fff}
+textarea{min-height:80px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.hidden{display:none!important}
+.total{text-align:center;font-size:58px;font-weight:800;letter-spacing:-.04em;margin:4px 0 0}
+.total small{font-size:22px;margin-left:5px}.status{text-align:center;color:var(--muted);margin-top:6px;min-height:21px}
+.barStage{height:175px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bar{position:relative;width:94%;height:12px;background:#777;border-radius:2px}
+.sleeve{position:absolute;top:50%;transform:translateY(-50%);width:35%;height:18px;background:#999;border-radius:2px}.sleeve.left{left:2%}.sleeve.right{right:2%}
+.collar{position:absolute;top:50%;transform:translateY(-50%);width:10px;height:34px;background:#666;border-radius:2px}.collar.left{left:35%}.collar.right{right:35%}
+.stack{position:absolute;top:50%;display:flex;align-items:center;transform:translateY(-50%)}.stack.left{right:65%;flex-direction:row-reverse}.stack.right{left:65%}
+.plate{display:flex;align-items:center;justify-content:center;border:1px solid #ddd;font-size:10px;border-radius:5px;color:#fff;flex:0 0 auto}
+.plate.small{height:60px;width:15px}.plate.large{height:80px}.plate.red{background:#d63c32;width:20px}.plate.blue{background:#2f6fcb;width:20px}.plate.yellow{background:#e5c735;width:20px}.plate.green{background:#39934a;width:20px}.plate.black{background:#111;width:20px}
+.plateButtons{display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem}
+.plateButton{position:relative;border:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;min-width:52px;width:52px;height:52px;color:#fff;font-size:10px;padding:0}
+.plateButton.large{width:62px;height:62px}.plateButton:disabled{opacity:.28}
+.badge{position:absolute;top:-5px;right:-5px;width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid #000;color:#000;display:flex;align-items:center;justify-content:center;font-size:10px}
+.inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.inv-row{display:grid;grid-template-columns:1fr 72px;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:9px 10px}.inv-row input{width:100%;border:1px solid var(--line);border-radius:6px;padding:7px;text-align:center}
+.note{font-size:13px;color:var(--muted);line-height:1.45}.result-list{margin-top:12px;line-height:1.7}
+.pr-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;background:#fff}
+.pr-name{font-weight:800}.pr-value{font-size:22px;font-weight:800;text-align:right}.pr-meta{font-size:12px;color:var(--muted);margin-top:3px}.pr-change{font-size:12px;color:var(--good)}
+.history-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.percent-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.percent-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.percent-card strong{font-size:20px}
+.backup-box{display:flex;gap:8px;flex-wrap:wrap}
+@media(min-width:680px){.home-grid{grid-template-columns:repeat(4,1fr)}.inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.percent-grid{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:900px){.plate.large{height:120px}.plate.red{width:55px}.plate.blue{width:45px}.plate.yellow{width:35px}.plate.green{width:25px}.plate.black.large{width:20px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div><h1>CrossFit Tools</h1><div class="subtitle">Barbell loading, PRs, percentages, and shared settings.</div></div>
+</header>
+
+<div id="topNav" class="card hidden">
+  <div class="navbar">
+    <button class="navbtn" data-view="home">Home</button>
+    <button class="navbtn" data-view="barbell">Barbell</button>
+    <button class="navbtn" data-view="prs">PRs</button>
+    <button class="navbtn" data-view="percent">Percentages</button>
+    <button class="navbtn" data-view="settings">Settings</button>
+  </div>
+</div>
+
+<section id="view-home">
+  <div class="home-grid">
+    <button class="home-tool" data-go="barbell"><div class="icon">🏋️</div><strong>Barbell Calculator</strong><span>Build or reverse-calculate a bar.</span></button>
+    <button class="home-tool" data-go="prs"><div class="icon">🏆</div><strong>Barbell PRs</strong><span>Track current PRs and full history.</span></button>
+    <button class="home-tool" data-go="percent"><div class="icon">📊</div><strong>Percentages</strong><span>Turn a PR into working weights.</span></button>
+    <button class="home-tool" data-go="settings"><div class="icon">⚙️</div><strong>Settings</strong><span>Units, plates, backup and restore.</span></button>
+  </div>
+</section>
+
+<section id="view-barbell" class="hidden">
+  <div class="card">
+    <div class="row">
+      <button class="choice calcTab active" data-tab="build">Build Bar</button>
+      <button class="choice calcTab" data-tab="reverse">Reverse Calculator</button>
+    </div>
+  </div>
+
+  <div id="buildPane">
+    <div class="card"><div class="total"><span id="buildTotal">45</span><small id="buildUnitLabel">lb</small></div><div class="status" id="buildStatus">Bar only</div>
+      <div class="barStage"><div class="bar"><div class="sleeve left"></div><div class="sleeve right"></div><div class="collar left"></div><div class="collar right"></div><div class="stack left" id="buildLeft"></div><div class="stack right" id="buildRight"></div></div></div>
+    </div>
+    <div class="card"><span class="section-title">Units</span><div class="row"><button class="choice buildUnit" data-unit="lb">LB</button><button class="choice buildUnit" data-unit="kg">KG</button></div></div>
+    <div class="card"><span class="section-title">Barbell</span><div class="row" id="buildBars"></div></div>
+    <div class="card"><span class="section-title">Add plate pair</span><div class="plateButtons" id="buildPlates"></div><div class="row" style="margin-top:10px"><button class="secondary" id="undoBuild">Undo</button><button class="secondary" id="resetBuild">Reset</button></div><div class="result-list" id="buildBreakdown"></div></div>
+  </div>
+
+  <div id="reversePane" class="hidden">
+    <div class="card"><div class="total"><span id="reverseTotal">0</span><small id="reverseUnitLabel">lb</small></div><div class="status" id="reverseStatus">Enter a target weight.</div>
+      <div class="barStage"><div class="bar"><div class="sleeve left"></div><div class="sleeve right"></div><div class="collar left"></div><div class="collar right"></div><div class="stack left" id="reverseLeft"></div><div class="stack right" id="reverseRight"></div></div></div>
+    </div>
+    <div class="card"><span class="section-title">Target total weight</span><input class="input" id="targetWeight" type="number" min="0" step="0.25" inputmode="decimal" placeholder="e.g. 225"></div>
+    <div class="card"><span class="section-title">Units</span><div class="row"><button class="choice reverseUnit" data-unit="lb">LB</button><button class="choice reverseUnit" data-unit="kg">KG</button></div></div>
+    <div class="card"><span class="section-title">Barbell</span><div class="row" id="reverseBars"></div></div>
+    <div class="card"><button class="primary" id="calculateReverse">Calculate Plates</button><div class="result-list" id="reverseBreakdown"></div></div>
+  </div>
+</section>
+
+<section id="view-prs" class="hidden">
+  <div class="card">
+    <span class="section-title">Add PR</span>
+    <div class="grid2">
+      <select id="prMovement"></select>
+      <input id="prWeight" class="input" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Weight">
+      <input id="prDate" class="input" type="date">
+      <select id="prUnit"><option value="kg">kg</option><option value="lb">lb</option></select>
+    </div>
+    <textarea id="prNotes" placeholder="Optional notes"></textarea>
+    <button class="primary" id="savePR" style="margin-top:10px">Save PR</button>
+  </div>
+
+  <div class="card">
+    <span class="section-title">Current PRs</span>
+    <div id="prList"></div>
+  </div>
+
+  <div id="prHistoryCard" class="card hidden">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div><span class="section-title" style="margin:0">PR History</span><strong id="historyTitle"></strong></div>
+      <button class="secondary" id="closeHistory">Close</button>
+    </div>
+    <div id="prHistory"></div>
+  </div>
+</section>
+
+<section id="view-percent" class="hidden">
+  <div class="card">
+    <span class="section-title">Percentage Calculator</span>
+    <div class="grid2">
+      <select id="pctMovement"></select>
+      <input id="pctBaseWeight" class="input" type="number" min="0" step="0.25" inputmode="decimal" placeholder="1RM / base weight">
+    </div>
+    <div class="row" style="margin-top:10px"><button class="choice pctUnit" data-unit="kg">KG</button><button class="choice pctUnit" data-unit="lb">LB</button></div>
+    <div class="percent-grid" id="percentGrid" style="margin-top:12px"></div>
+  </div>
+  <div class="card">
+    <span class="section-title">Load selected percentage</span>
+    <div class="note">Tap a percentage card to send that working weight directly to the reverse barbell calculator using your saved plate inventory.</div>
+  </div>
+</section>
+
+<section id="view-settings" class="hidden">
+  <div class="card">
+    <span class="section-title">Preferred Unit</span>
+    <div class="row"><button class="choice settingUnit" data-unit="kg">KG</button><button class="choice settingUnit" data-unit="lb">LB</button></div>
+  </div>
+
+  <div class="card">
+    <span class="section-title">Available Plate Pairs</span>
+    <div class="note">This inventory is global. It controls Build Bar, Reverse Calculator, and LB↔KG conversion.</div>
+    <div class="row" style="margin:10px 0">
+      <button class="choice prefUnit" data-unit="kg">KG plates</button><button class="choice prefUnit" data-unit="lb">LB plates</button>
+      <button class="secondary" id="prefNone">None</button><button class="secondary" id="prefAll">All available</button>
+    </div>
+    <div class="inventory-grid" id="globalInventoryGrid"></div>
+  </div>
+
+  <div class="card">
+    <span class="section-title">Data Backup</span>
+    <div class="note">Exports all PRs, preferences, and plate inventory as one JSON file.</div>
+    <div class="backup-box" style="margin-top:10px">
+      <button class="secondary" id="exportData">Export Backup</button>
+      <label class="secondary" style="display:inline-flex;align-items:center">Import Backup<input id="importData" type="file" accept="application/json" style="display:none"></label>
+    </div>
+  </div>
+</section>
+</div>
+
+<script>
+const STORAGE_KEY="crossfitToolsDataV1",LB_PER_KG=2.2046226218;
+const plateData={
+lb:{bars:[45,35,15],plates:[{weight:55,size:"large",color:"red"},{weight:45,size:"large",color:"blue"},{weight:35,size:"large",color:"yellow"},{weight:25,size:"large",color:"green"},{weight:15,size:"large",color:"black"},{weight:10,size:"large",color:"black"},{weight:5,size:"small",color:"black"},{weight:2.5,size:"small",color:"black"},{weight:1,size:"small",color:"black"},{weight:.75,size:"small",color:"black"},{weight:.5,size:"small",color:"black"},{weight:.25,size:"small",color:"black"}]},
+kg:{bars:[20,15,6.8],plates:[{weight:25,size:"large",color:"red"},{weight:20,size:"large",color:"blue"},{weight:15,size:"large",color:"yellow"},{weight:10,size:"large",color:"green"},{weight:5,size:"small",color:"black"},{weight:2.5,size:"small",color:"black"},{weight:2,size:"small",color:"black"},{weight:1.5,size:"small",color:"black"},{weight:1,size:"small",color:"black"},{weight:.5,size:"small",color:"black"}]}
+};
+const movements=["Back Squat","Front Squat","Deadlift","Clean","Clean & Jerk","Snatch","Bench Press","Push Press","Strict Press","Thruster","Overhead Squat"];
+const $=id=>document.getElementById(id),fmt=n=>Number.isInteger(Number(n))?String(Number(n)):String(parseFloat(Number(n).toFixed(2)));
+function convert(v,from,to){if(from===to)return Number(v);return from==="lb"?Number(v)/LB_PER_KG:Number(v)*LB_PER_KG}
+function defaultInventory(){const out={lb:{},kg:{}};["lb","kg"].forEach(u=>plateData[u].plates.forEach(p=>out[u][p.weight]=10));return out}
+function defaultState(){return{preferredUnit:"kg",inventory:defaultInventory(),prs:[]}}
+let state=loadState();
+function loadState(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s){const d=defaultState();return{...d,...s,inventory:{lb:{...d.inventory.lb,...(s.inventory?.lb||{})},kg:{...d.inventory.kg,...(s.inventory?.kg||{})}},prs:Array.isArray(s.prs)?s.prs:[]}}}catch{}return defaultState()}
+function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function meta(unit,w){return plateData[unit].plates.find(p=>p.weight===Number(w))}
+function stack(ps,u){return ps.map(w=>{const p=meta(u,w);return `<div class="plate ${p.size} ${p.color}"></div>`}).join("")}
+function usedPairs(arr){const c={};arr.forEach(w=>c[w]=(c[w]||0)+1);return c}
+function betterCombo(a,b){if(!b)return true;if(a.length!==b.length)return a.length<b.length;const aa=[...a].sort((x,y)=>y-x),bb=[...b].sort((x,y)=>y-x);for(let i=0;i<Math.max(aa.length,bb.length);i++){const av=aa[i]||0,bv=bb[i]||0;if(av!==bv)return av>bv}return false}
+function bestCombination(targetPerSide,unit,inventory){
+  const scale=100,target=Math.max(0,Math.round(targetPerSide*scale));let states=new Map([[0,[]]]);
+  for(const p of plateData[unit].plates){const w=Math.round(p.weight*scale),qty=Math.max(0,Math.floor(inventory[p.weight]||0)),base=[...states.entries()],next=new Map(states);
+    for(const [cur,combo] of base){for(let c=1;c<=qty;c++){const nw=cur+w*c;if(nw>target)break;const cand=[...combo,...Array(c).fill(p.weight)],ex=next.get(nw);if(!ex||betterCombo(cand,ex))next.set(nw,cand)}}states=next}
+  const best=Math.max(...states.keys()),chosen=states.get(best)||[];chosen.sort((a,b)=>b-a);return{weight:best/scale,plates:chosen}
+}
+
+/* navigation */
+function showView(name){
+  document.querySelectorAll('[id^="view-"]').forEach(v=>v.classList.add("hidden"));
+  $("view-"+name).classList.remove("hidden");
+  $("topNav").classList.toggle("hidden",name==="home");
+  document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.view===name));
+  if(name==="prs")renderPRs();
+  if(name==="percent")renderPercentage();
+  if(name==="settings")renderSettings();
+}
+document.addEventListener("click",e=>{if(e.target.closest("[data-go]"))showView(e.target.closest("[data-go]").dataset.go);if(e.target.matches(".navbtn"))showView(e.target.dataset.view)});
+
+/* calculator */
+let buildUnit=state.preferredUnit,buildBar=plateData[buildUnit].bars[0],buildLoaded=[],buildHistory=[];
+let reverseUnit=state.preferredUnit,reverseBar=plateData[reverseUnit].bars[0];
+
+function renderBuildControls(){
+  $("buildUnitLabel").textContent=buildUnit;document.querySelectorAll(".buildUnit").forEach(b=>b.classList.toggle("active",b.dataset.unit===buildUnit));
+  $("buildBars").innerHTML=plateData[buildUnit].bars.map(v=>`<button class="choice buildBarBtn ${v===buildBar?"active":""}" data-v="${v}">${fmt(v)} ${buildUnit}</button>`).join("");
+  const inv=state.inventory[buildUnit],used=usedPairs(buildLoaded),colors={red:"#d63c32",blue:"#2f6fcb",yellow:"#e5c735",green:"#39934a",black:"#111"};
+  $("buildPlates").innerHTML=plateData[buildUnit].plates.map(p=>{const remaining=Math.max(0,(inv[p.weight]||0)-(used[p.weight]||0));return `<button class="plateButton buildPlateBtn ${p.size}" style="background:${colors[p.color]};opacity:${remaining?1:.28}" data-v="${p.weight}" ${remaining?"":"disabled"}>${fmt(p.weight)}${used[p.weight]?`<span class="badge">${used[p.weight]*2}</span>`:""}</button>`}).join("");
+}
+function renderBuild(){
+  renderBuildControls();const total=buildBar+buildLoaded.reduce((s,p)=>s+2*p,0);$("buildTotal").textContent=fmt(total);$("buildStatus").textContent=buildLoaded.length?`${fmt((total-buildBar)/2)} ${buildUnit} per side + ${fmt(buildBar)} ${buildUnit} bar`:"Bar only";
+  $("buildLeft").innerHTML=stack(buildLoaded,buildUnit);$("buildRight").innerHTML=stack(buildLoaded,buildUnit);
+  const c=usedPairs(buildLoaded);$("buildBreakdown").innerHTML=Object.keys(c).sort((a,b)=>b-a).map(p=>`${c[p]} × ${fmt(+p)} ${buildUnit} per side`).join("<br>");
+}
+function switchBuildUnit(newUnit){
+  if(newUnit===buildUnit)return;const total=buildBar+buildLoaded.reduce((s,p)=>s+2*p,0),converted=convert(total,buildUnit,newUnit);buildUnit=newUnit;buildBar=plateData[newUnit].bars[0];
+  const r=bestCombination(Math.max(0,(converted-buildBar)/2),newUnit,state.inventory[newUnit]);buildLoaded=r.plates;buildHistory=[];renderBuild()
+}
+document.addEventListener("click",e=>{
+  if(e.target.matches(".calcTab")){$(".calcTab.active")?.classList.remove("active");e.target.classList.add("active");const rev=e.target.dataset.tab==="reverse";$("buildPane").classList.toggle("hidden",rev);$("reversePane").classList.toggle("hidden",!rev)}
+  if(e.target.matches(".buildUnit"))switchBuildUnit(e.target.dataset.unit);
+  if(e.target.matches(".buildBarBtn")){buildBar=+e.target.dataset.v;renderBuild()}
+  if(e.target.matches(".buildPlateBtn")&&!e.target.disabled){const w=+e.target.dataset.v,used=usedPairs(buildLoaded);if((used[w]||0)<(state.inventory[buildUnit][w]||0)){buildHistory.push([...buildLoaded]);buildLoaded.push(w);buildLoaded.sort((a,b)=>b-a);renderBuild()}}
+});
+$("undoBuild").onclick=()=>{if(buildHistory.length){buildLoaded=buildHistory.pop();renderBuild()}};
+$("resetBuild").onclick=()=>{buildHistory.push([...buildLoaded]);buildLoaded=[];renderBuild()};
+
+function renderReverseControls(){
+  $("reverseUnitLabel").textContent=reverseUnit;document.querySelectorAll(".reverseUnit").forEach(b=>b.classList.toggle("active",b.dataset.unit===reverseUnit));
+  $("reverseBars").innerHTML=plateData[reverseUnit].bars.map(v=>`<button class="choice reverseBarBtn ${v===reverseBar?"active":""}" data-v="${v}">${fmt(v)} ${reverseUnit}</button>`).join("");
+}
+function calculateReverse(){
+  const target=Number($("targetWeight").value);if(!Number.isFinite(target)||target<=0){$("reverseStatus").textContent="Enter a valid target weight.";return}
+  if(target<reverseBar){$("reverseStatus").textContent=`Target is lighter than the selected ${fmt(reverseBar)} ${reverseUnit} bar.`;return}
+  const r=bestCombination((target-reverseBar)/2,reverseUnit,state.inventory[reverseUnit]),ach=reverseBar+2*r.weight,exact=Math.abs(ach-target)<.001;
+  $("reverseTotal").textContent=fmt(ach);$("reverseStatus").textContent=exact?"Exact target using your available plates.":`Closest achievable load: ${fmt(ach)} ${reverseUnit}`;
+  $("reverseLeft").innerHTML=stack(r.plates,reverseUnit);$("reverseRight").innerHTML=stack(r.plates,reverseUnit);
+  const c=usedPairs(r.plates),lines=Object.keys(c).sort((a,b)=>b-a).map(p=>`${c[p]} pair${c[p]===1?"":"s"} × ${fmt(+p)} ${reverseUnit}`);
+  $("reverseBreakdown").innerHTML=lines.length?`<strong>${fmt(ach)} ${reverseUnit}</strong><br>${lines.join("<br>")}${exact?"":`<br>Difference: ${fmt(target-ach)} ${reverseUnit}`}`:`Bar only`;
+}
+document.addEventListener("click",e=>{
+  if(e.target.matches(".reverseUnit")){const nu=e.target.dataset.unit;if(nu!==reverseUnit){const t=Number($("targetWeight").value),has=Number.isFinite(t)&&t>0,converted=has?convert(t,reverseUnit,nu):0;reverseUnit=nu;reverseBar=plateData[nu].bars[0];renderReverseControls();if(has){$("targetWeight").value=fmt(converted);calculateReverse()}}}
+  if(e.target.matches(".reverseBarBtn")){reverseBar=+e.target.dataset.v;renderReverseControls()}
+});
+$("calculateReverse").onclick=calculateReverse;
+
+/* PRs */
+function initMovementSelects(){[$("prMovement"),$("pctMovement")].forEach(sel=>sel.innerHTML=movements.map(m=>`<option>${m}</option>`).join(""))}
+$("prDate").value=new Date().toISOString().slice(0,10);$("prUnit").value=state.preferredUnit;
+$("savePR").onclick=()=>{
+  const movement=$("prMovement").value,weight=Number($("prWeight").value),date=$("prDate").value,unit=$("prUnit").value,notes=$("prNotes").value.trim();
+  if(!movement||!weight||!date)return;
+  state.prs.push({id:Date.now(),movement,weight,unit,date,notes});saveState();$("prWeight").value="";$("prNotes").value="";renderPRs()
+};
+function prsForMovement(m){return state.prs.filter(x=>x.movement===m).sort((a,b)=>new Date(b.date)-new Date(a.date)||b.id-a.id)}
+function bestPR(m){
+  const list=state.prs.filter(x=>x.movement===m);if(!list.length)return null;
+  return list.reduce((best,x)=>convert(x.weight,x.unit,state.preferredUnit)>convert(best.weight,best.unit,state.preferredUnit)?x:best)
+}
+function renderPRs(){
+  const cards=movements.map(m=>{const best=bestPR(m);if(!best)return `<div class="pr-card"><div><div class="pr-name">${m}</div><div class="pr-meta">No PR yet</div></div><button class="secondary historyBtn" data-movement="${m}">History</button></div>`;
+    const list=prsForMovement(m),converted=convert(best.weight,best.unit,state.preferredUnit),previous=list.filter(x=>x.id!==best.id).sort((a,b)=>convert(b.weight,b.unit,state.preferredUnit)-convert(a.weight,a.unit,state.preferredUnit))[0];
+    const change=previous?converted-convert(previous.weight,previous.unit,state.preferredUnit):null;
+    return `<div class="pr-card"><div><div class="pr-name">${m}</div><div class="pr-meta">${best.date}${best.notes?` · ${best.notes}`:""}</div>${change>0?`<div class="pr-change">+${fmt(change)} ${state.preferredUnit}</div>`:""}</div><div><div class="pr-value">${fmt(converted)} ${state.preferredUnit}</div><button class="secondary historyBtn" data-movement="${m}" style="margin-top:6px">History</button></div></div>`}).join("");
+  $("prList").innerHTML=cards
+}
+document.addEventListener("click",e=>{if(e.target.matches(".historyBtn")){const m=e.target.dataset.movement,list=prsForMovement(m);$("historyTitle").textContent=m;$("prHistory").innerHTML=list.length?list.map(x=>`<div class="history-row"><div><strong>${fmt(x.weight)} ${x.unit}</strong><div class="pr-meta">${x.date}${x.notes?` · ${x.notes}`:""}</div></div><button class="secondary deletePR" data-id="${x.id}">Delete</button></div>`).join(""):"No history";$("prHistoryCard").classList.remove("hidden")}if(e.target.matches(".deletePR")){state.prs=state.prs.filter(x=>x.id!==Number(e.target.dataset.id));saveState();renderPRs();$("prHistoryCard").classList.add("hidden")}});
+$("closeHistory").onclick=()=>$("prHistoryCard").classList.add("hidden");
+
+/* percentages */
+let pctUnit=state.preferredUnit;
+function renderPercentage(){
+  document.querySelectorAll(".pctUnit").forEach(b=>b.classList.toggle("active",b.dataset.unit===pctUnit));
+  const m=$("pctMovement").value,best=bestPR(m);if(best&&!$("pctBaseWeight").value)$("pctBaseWeight").value=fmt(convert(best.weight,best.unit,pctUnit));
+  const base=Number($("pctBaseWeight").value)||0,vals=[50,55,60,65,70,75,80,85,90,95,100];
+  $("percentGrid").innerHTML=vals.map(p=>{const w=base*p/100;return `<button class="percent-card pctCard" data-weight="${w}"><span>${p}%</span><br><strong>${fmt(w)} ${pctUnit}</strong></button>`}).join("")
+}
+$("pctMovement").addEventListener("change",()=>{$("pctBaseWeight").value="";renderPercentage()});$("pctBaseWeight").addEventListener("input",renderPercentage);
+document.addEventListener("click",e=>{if(e.target.matches(".pctUnit")){const nu=e.target.dataset.unit;if(nu!==pctUnit){const v=Number($("pctBaseWeight").value);if(v)$("pctBaseWeight").value=fmt(convert(v,pctUnit,nu));pctUnit=nu;renderPercentage()}}if(e.target.closest(".pctCard")){const w=Number(e.target.closest(".pctCard").dataset.weight);reverseUnit=pctUnit;reverseBar=plateData[reverseUnit].bars[0];$("targetWeight").value=fmt(w);renderReverseControls();calculateReverse();showView("barbell");document.querySelectorAll(".calcTab").forEach(b=>b.classList.toggle("active",b.dataset.tab==="reverse"));$("buildPane").classList.add("hidden");$("reversePane").classList.remove("hidden")}});
+
+/* settings */
+let prefUnit=state.preferredUnit;
+function renderSettings(){
+  document.querySelectorAll(".settingUnit").forEach(b=>b.classList.toggle("active",b.dataset.unit===state.preferredUnit));document.querySelectorAll(".prefUnit").forEach(b=>b.classList.toggle("active",b.dataset.unit===prefUnit));
+  $("globalInventoryGrid").innerHTML=plateData[prefUnit].plates.map(p=>`<label class="inv-row"><span>${fmt(p.weight)} ${prefUnit}</span><input class="globalInvInput" data-v="${p.weight}" type="number" min="0" step="1" value="${state.inventory[prefUnit][p.weight]??0}"></label>`).join("")
+}
+document.addEventListener("click",e=>{
+  if(e.target.matches(".settingUnit")){state.preferredUnit=e.target.dataset.unit;saveState();$("prUnit").value=state.preferredUnit;renderSettings()}
+  if(e.target.matches(".prefUnit")){prefUnit=e.target.dataset.unit;renderSettings()}
+});
+document.addEventListener("change",e=>{if(e.target.matches(".globalInvInput")){state.inventory[prefUnit][e.target.dataset.v]=Math.max(0,Math.floor(Number(e.target.value)||0));saveState();renderSettings();if(prefUnit===buildUnit){const allowed=state.inventory[buildUnit],seen={};buildLoaded=buildLoaded.filter(w=>{seen[w]=(seen[w]||0)+1;return seen[w]<=Math.max(0,allowed[w]||0)});renderBuild()}}});
+$("prefNone").onclick=()=>{plateData[prefUnit].plates.forEach(p=>state.inventory[prefUnit][p.weight]=0);saveState();renderSettings();if(prefUnit===buildUnit){buildLoaded=[];renderBuild()}};
+$("prefAll").onclick=()=>{plateData[prefUnit].plates.forEach(p=>state.inventory[prefUnit][p.weight]=10);saveState();renderSettings();renderBuild()};
+
+$("exportData").onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crossfit-tools-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500)
+};
+$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());state={...defaultState(),...obj,inventory:{lb:{...defaultState().inventory.lb,...(obj.inventory?.lb||{})},kg:{...defaultState().inventory.kg,...(obj.inventory?.kg||{})}},prs:Array.isArray(obj.prs)?obj.prs:[]};saveState();buildUnit=reverseUnit=pctUnit=state.preferredUnit;buildBar=plateData[buildUnit].bars[0];reverseBar=plateData[reverseUnit].bars[0];buildLoaded=[];renderBuild();renderReverseControls();renderSettings();renderPRs();renderPercentage();alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
+
+initMovementSelects();renderBuild();renderReverseControls();renderPRs();renderPercentage();renderSettings();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
