@@ -15,6 +15,7 @@
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
+button:disabled{cursor:not-allowed}.primary:disabled,.secondary:disabled{opacity:.4}
 .container{max-width:860px;margin:auto;padding:16px 16px 36px}
 header{padding:12px 0 4px;display:flex;justify-content:space-between;gap:12px;align-items:center}
 h1{font-size:28px;margin:0}.subtitle{color:var(--muted);font-size:14px}
@@ -40,10 +41,12 @@ textarea{min-height:80px}
 .sleeve{position:absolute;top:50%;transform:translateY(-50%);width:35%;height:18px;background:#999;border-radius:2px}.sleeve.left{left:2%}.sleeve.right{right:2%}
 .collar{position:absolute;top:50%;transform:translateY(-50%);width:10px;height:34px;background:#666;border-radius:2px}.collar.left{left:35%}.collar.right{right:35%}
 .stack{position:absolute;top:50%;display:flex;align-items:center;transform:translateY(-50%)}.stack.left{right:65%;flex-direction:row-reverse}.stack.right{left:65%}
-.plate{display:flex;align-items:center;justify-content:center;border:1px solid #ddd;font-size:10px;border-radius:5px;color:#fff;flex:0 0 auto}
+.plate{display:flex;align-items:center;justify-content:center;border:1px solid #ddd;font-size:12px;font-weight:800;line-height:1;border-radius:5px;color:#fff;flex:0 0 auto}
+.plate-label{display:block;white-space:nowrap;transform:rotate(-90deg)}
 .plate.small{height:60px;width:15px}.plate.large{height:80px}.plate.red{background:#d63c32;width:20px}.plate.blue{background:#2f6fcb;width:20px}.plate.yellow{background:#e5c735;width:20px}.plate.green{background:#39934a;width:20px}.plate.black{background:#111;width:20px}
+.plate.yellow,.plate.green,.plateButton.yellow,.plateButton.green{color:#111}
 .plateButtons{display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem}
-.plateButton{position:relative;border:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;min-width:52px;width:52px;height:52px;color:#fff;font-size:10px;padding:0}
+.plateButton{position:relative;border:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;min-width:52px;width:52px;height:52px;color:#fff;font-size:14px;padding:0}
 .plateButton.large{width:62px;height:62px}.plateButton:disabled{opacity:.28}
 .badge{position:absolute;top:-5px;right:-5px;width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid #000;color:#000;display:flex;align-items:center;justify-content:center;font-size:10px}
 .inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -92,21 +95,21 @@ textarea{min-height:80px}
   </div>
 
   <div id="buildPane">
-    <div class="card"><div class="total"><span id="buildTotal">45</span><small id="buildUnitLabel">lb</small></div><div class="status" id="buildStatus">Bar only</div>
+    <div class="card"><div class="total"><span id="buildTotal">—</span><small id="buildUnitLabel">kg</small></div><div class="status" id="buildStatus" role="status">Choose a barbell before adding plates.</div>
       <div class="barStage"><div class="bar"><div class="sleeve left"></div><div class="sleeve right"></div><div class="collar left"></div><div class="collar right"></div><div class="stack left" id="buildLeft"></div><div class="stack right" id="buildRight"></div></div></div>
     </div>
     <div class="card"><span class="section-title">Units</span><div class="row"><button class="choice buildUnit" data-unit="lb">LB</button><button class="choice buildUnit" data-unit="kg">KG</button></div></div>
-    <div class="card"><span class="section-title">Barbell</span><div class="row" id="buildBars"></div></div>
-    <div class="card"><span class="section-title">Add plate pair</span><div class="plateButtons" id="buildPlates"></div><div class="row" style="margin-top:10px"><button class="secondary" id="undoBuild">Undo</button><button class="secondary" id="resetBuild">Reset</button></div><div class="result-list" id="buildBreakdown"></div></div>
+    <div class="card"><span class="section-title">1. Choose a barbell</span><div class="row" id="buildBars"></div></div>
+    <div class="card"><span class="section-title">2. Add plate pairs</span><div class="note" id="buildPlateHint" style="margin-bottom:10px">Choose a barbell above to enable plates.</div><div class="plateButtons" id="buildPlates"></div><div class="row" style="margin-top:10px"><button class="secondary" id="undoBuild">Undo</button><button class="secondary" id="resetBuild">Reset</button></div><div class="result-list" id="buildBreakdown"></div></div>
   </div>
 
   <div id="reversePane" class="hidden">
-    <div class="card"><div class="total"><span id="reverseTotal">0</span><small id="reverseUnitLabel">lb</small></div><div class="status" id="reverseStatus">Enter a target weight.</div>
+    <div class="card"><div class="total"><span id="reverseTotal">—</span><small id="reverseUnitLabel">kg</small></div><div class="status" id="reverseStatus" role="status">Choose a barbell before calculating plates.</div>
       <div class="barStage"><div class="bar"><div class="sleeve left"></div><div class="sleeve right"></div><div class="collar left"></div><div class="collar right"></div><div class="stack left" id="reverseLeft"></div><div class="stack right" id="reverseRight"></div></div></div>
     </div>
     <div class="card"><span class="section-title">Target total weight</span><input class="input" id="targetWeight" type="number" min="0" step="0.25" inputmode="decimal" placeholder="e.g. 225"></div>
     <div class="card"><span class="section-title">Units</span><div class="row"><button class="choice reverseUnit" data-unit="lb">LB</button><button class="choice reverseUnit" data-unit="kg">KG</button></div></div>
-    <div class="card"><span class="section-title">Barbell</span><div class="row" id="reverseBars"></div></div>
+    <div class="card"><span class="section-title">Choose a barbell</span><div class="row" id="reverseBars"></div></div>
     <div class="card"><button class="primary" id="calculateReverse">Calculate Plates</button><div class="result-list" id="reverseBreakdown"></div></div>
   </div>
 </section>
@@ -196,7 +199,7 @@ let state=loadState();
 function loadState(){try{const s=JSON.parse(localStorage.getItem(STORAGE_KEY));if(s){const d=defaultState();return{...d,...s,inventory:{lb:{...d.inventory.lb,...(s.inventory?.lb||{})},kg:{...d.inventory.kg,...(s.inventory?.kg||{})}},prs:Array.isArray(s.prs)?s.prs:[]}}}catch{}return defaultState()}
 function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
 function meta(unit,w){return plateData[unit].plates.find(p=>p.weight===Number(w))}
-function stack(ps,u){return ps.map(w=>{const p=meta(u,w);return `<div class="plate ${p.size} ${p.color}"></div>`}).join("")}
+function stack(ps,u){return ps.map(w=>{const p=meta(u,w),label=`${fmt(w)} ${u} plate`;return `<div class="plate ${p.size} ${p.color}" role="img" aria-label="${label}" title="${label}"><span class="plate-label" aria-hidden="true">${fmt(w)}</span></div>`}).join("")}
 function usedPairs(arr){const c={};arr.forEach(w=>c[w]=(c[w]||0)+1);return c}
 function betterCombo(a,b){if(!b)return true;if(a.length!==b.length)return a.length<b.length;const aa=[...a].sort((x,y)=>y-x),bb=[...b].sort((x,y)=>y-x);for(let i=0;i<Math.max(aa.length,bb.length);i++){const av=aa[i]||0,bv=bb[i]||0;if(av!==bv)return av>bv}return false}
 function bestCombination(targetPerSide,unit,inventory){
@@ -219,40 +222,53 @@ function showView(name){
 document.addEventListener("click",e=>{if(e.target.closest("[data-go]"))showView(e.target.closest("[data-go]").dataset.go);if(e.target.matches(".navbtn"))showView(e.target.dataset.view)});
 
 /* calculator */
-let buildUnit=state.preferredUnit,buildBar=plateData[buildUnit].bars[0],buildLoaded=[],buildHistory=[];
-let reverseUnit=state.preferredUnit,reverseBar=plateData[reverseUnit].bars[0];
+let buildUnit=state.preferredUnit,buildBar=null,buildLoaded=[],buildHistory=[],buildTarget=null;
+let reverseUnit=state.preferredUnit,reverseBar=null;
 
 function renderBuildControls(){
   $("buildUnitLabel").textContent=buildUnit;document.querySelectorAll(".buildUnit").forEach(b=>b.classList.toggle("active",b.dataset.unit===buildUnit));
-  $("buildBars").innerHTML=plateData[buildUnit].bars.map(v=>`<button class="choice buildBarBtn ${v===buildBar?"active":""}" data-v="${v}">${fmt(v)} ${buildUnit}</button>`).join("");
+  $("buildBars").innerHTML=plateData[buildUnit].bars.map(v=>`<button class="choice buildBarBtn ${v===buildBar?"active":""}" data-v="${v}" aria-pressed="${v===buildBar}">${fmt(v)} ${buildUnit}</button>`).join("");
   const inv=state.inventory[buildUnit],used=usedPairs(buildLoaded),colors={red:"#d63c32",blue:"#2f6fcb",yellow:"#e5c735",green:"#39934a",black:"#111"};
-  $("buildPlates").innerHTML=plateData[buildUnit].plates.map(p=>{const remaining=Math.max(0,(inv[p.weight]||0)-(used[p.weight]||0));return `<button class="plateButton buildPlateBtn ${p.size}" style="background:${colors[p.color]};opacity:${remaining?1:.28}" data-v="${p.weight}" ${remaining?"":"disabled"}>${fmt(p.weight)}${used[p.weight]?`<span class="badge">${used[p.weight]*2}</span>`:""}</button>`}).join("");
+  $("buildPlates").innerHTML=plateData[buildUnit].plates.map(p=>{const remaining=Math.max(0,(inv[p.weight]||0)-(used[p.weight]||0)),enabled=buildBar!==null&&remaining>0;return `<button class="plateButton buildPlateBtn ${p.size} ${p.color}" style="background:${colors[p.color]}" data-v="${p.weight}" aria-label="Add pair of ${fmt(p.weight)} ${buildUnit} plates" ${enabled?"":"disabled"}>${fmt(p.weight)}${used[p.weight]?`<span class="badge">${used[p.weight]*2}</span>`:""}</button>`}).join("");
+  $("buildPlateHint").classList.toggle("hidden",buildBar!==null);
+  $("undoBuild").disabled=buildBar===null||!buildHistory.length;$("resetBuild").disabled=buildBar===null||!buildLoaded.length;
 }
 function renderBuild(){
-  renderBuildControls();const total=buildBar+buildLoaded.reduce((s,p)=>s+2*p,0);$("buildTotal").textContent=fmt(total);$("buildStatus").textContent=buildLoaded.length?`${fmt((total-buildBar)/2)} ${buildUnit} per side + ${fmt(buildBar)} ${buildUnit} bar`:"Bar only";
+  renderBuildControls();
+  if(buildBar===null){$("buildTotal").textContent="—";$("buildStatus").textContent=buildTarget===null?"Choose a barbell before adding plates.":`Choose a barbell for your converted ${fmt(buildTarget)} ${buildUnit} load.`;$("buildLeft").innerHTML="";$("buildRight").innerHTML="";$("buildBreakdown").innerHTML="";return}
+  const total=buildBar+buildLoaded.reduce((s,p)=>s+2*p,0);$("buildTotal").textContent=fmt(total);$("buildStatus").textContent=buildLoaded.length?`${fmt((total-buildBar)/2)} ${buildUnit} per side + ${fmt(buildBar)} ${buildUnit} bar`:"Bar only";
   $("buildLeft").innerHTML=stack(buildLoaded,buildUnit);$("buildRight").innerHTML=stack(buildLoaded,buildUnit);
   const c=usedPairs(buildLoaded);$("buildBreakdown").innerHTML=Object.keys(c).sort((a,b)=>b-a).map(p=>`${c[p]} × ${fmt(+p)} ${buildUnit} per side`).join("<br>");
 }
 function switchBuildUnit(newUnit){
-  if(newUnit===buildUnit)return;const total=buildBar+buildLoaded.reduce((s,p)=>s+2*p,0),converted=convert(total,buildUnit,newUnit);buildUnit=newUnit;buildBar=plateData[newUnit].bars[0];
-  const r=bestCombination(Math.max(0,(converted-buildBar)/2),newUnit,state.inventory[newUnit]);buildLoaded=r.plates;buildHistory=[];renderBuild()
+  if(newUnit===buildUnit)return;
+  const total=buildBar===null?buildTarget:buildBar+buildLoaded.reduce((s,p)=>s+2*p,0);buildTarget=total===null?null:convert(total,buildUnit,newUnit);
+  buildUnit=newUnit;buildBar=null;buildLoaded=[];buildHistory=[];renderBuild()
 }
 document.addEventListener("click",e=>{
   if(e.target.matches(".calcTab")){$(".calcTab.active")?.classList.remove("active");e.target.classList.add("active");const rev=e.target.dataset.tab==="reverse";$("buildPane").classList.toggle("hidden",rev);$("reversePane").classList.toggle("hidden",!rev)}
   if(e.target.matches(".buildUnit"))switchBuildUnit(e.target.dataset.unit);
-  if(e.target.matches(".buildBarBtn")){buildBar=+e.target.dataset.v;renderBuild()}
-  if(e.target.matches(".buildPlateBtn")&&!e.target.disabled){const w=+e.target.dataset.v,used=usedPairs(buildLoaded);if((used[w]||0)<(state.inventory[buildUnit][w]||0)){buildHistory.push([...buildLoaded]);buildLoaded.push(w);buildLoaded.sort((a,b)=>b-a);renderBuild()}}
+  if(e.target.matches(".buildBarBtn")){buildBar=+e.target.dataset.v;if(buildTarget!==null){const r=bestCombination(Math.max(0,(buildTarget-buildBar)/2),buildUnit,state.inventory[buildUnit]);buildLoaded=r.plates;buildTarget=null;buildHistory=[]}renderBuild()}
+  const plateButton=e.target.closest(".buildPlateBtn");
+  if(plateButton&&!plateButton.disabled&&buildBar!==null){const w=+plateButton.dataset.v,used=usedPairs(buildLoaded);if((used[w]||0)<(state.inventory[buildUnit][w]||0)){buildHistory.push([...buildLoaded]);buildLoaded.push(w);buildLoaded.sort((a,b)=>b-a);renderBuild()}}
 });
 $("undoBuild").onclick=()=>{if(buildHistory.length){buildLoaded=buildHistory.pop();renderBuild()}};
 $("resetBuild").onclick=()=>{buildHistory.push([...buildLoaded]);buildLoaded=[];renderBuild()};
 
+function clearReverseResult(message){
+  $("reverseTotal").textContent="—";$("reverseLeft").innerHTML="";$("reverseRight").innerHTML="";$("reverseBreakdown").innerHTML="";
+  $("reverseStatus").textContent=message||(reverseBar===null?"Choose a barbell before calculating plates.":"Enter a target weight, then calculate plates.");
+}
 function renderReverseControls(){
   $("reverseUnitLabel").textContent=reverseUnit;document.querySelectorAll(".reverseUnit").forEach(b=>b.classList.toggle("active",b.dataset.unit===reverseUnit));
-  $("reverseBars").innerHTML=plateData[reverseUnit].bars.map(v=>`<button class="choice reverseBarBtn ${v===reverseBar?"active":""}" data-v="${v}">${fmt(v)} ${reverseUnit}</button>`).join("");
+  $("reverseBars").innerHTML=plateData[reverseUnit].bars.map(v=>`<button class="choice reverseBarBtn ${v===reverseBar?"active":""}" data-v="${v}" aria-pressed="${v===reverseBar}">${fmt(v)} ${reverseUnit}</button>`).join("");
+  $("calculateReverse").disabled=reverseBar===null;
+  if(reverseBar===null)clearReverseResult();
 }
 function calculateReverse(){
-  const target=Number($("targetWeight").value);if(!Number.isFinite(target)||target<=0){$("reverseStatus").textContent="Enter a valid target weight.";return}
-  if(target<reverseBar){$("reverseStatus").textContent=`Target is lighter than the selected ${fmt(reverseBar)} ${reverseUnit} bar.`;return}
+  if(reverseBar===null){clearReverseResult();return}
+  const target=Number($("targetWeight").value);if(!Number.isFinite(target)||target<=0){clearReverseResult("Enter a valid target weight.");return}
+  if(target<reverseBar){clearReverseResult(`Target is lighter than the selected ${fmt(reverseBar)} ${reverseUnit} bar.`);return}
   const r=bestCombination((target-reverseBar)/2,reverseUnit,state.inventory[reverseUnit]),ach=reverseBar+2*r.weight,exact=Math.abs(ach-target)<.001;
   $("reverseTotal").textContent=fmt(ach);$("reverseStatus").textContent=exact?"Exact target using your available plates.":`Closest achievable load: ${fmt(ach)} ${reverseUnit}`;
   $("reverseLeft").innerHTML=stack(r.plates,reverseUnit);$("reverseRight").innerHTML=stack(r.plates,reverseUnit);
@@ -260,8 +276,8 @@ function calculateReverse(){
   $("reverseBreakdown").innerHTML=lines.length?`<strong>${fmt(ach)} ${reverseUnit}</strong><br>${lines.join("<br>")}${exact?"":`<br>Difference: ${fmt(target-ach)} ${reverseUnit}`}`:`Bar only`;
 }
 document.addEventListener("click",e=>{
-  if(e.target.matches(".reverseUnit")){const nu=e.target.dataset.unit;if(nu!==reverseUnit){const t=Number($("targetWeight").value),has=Number.isFinite(t)&&t>0,converted=has?convert(t,reverseUnit,nu):0;reverseUnit=nu;reverseBar=plateData[nu].bars[0];renderReverseControls();if(has){$("targetWeight").value=fmt(converted);calculateReverse()}}}
-  if(e.target.matches(".reverseBarBtn")){reverseBar=+e.target.dataset.v;renderReverseControls()}
+  if(e.target.matches(".reverseUnit")){const nu=e.target.dataset.unit;if(nu!==reverseUnit){const t=Number($("targetWeight").value),has=Number.isFinite(t)&&t>0,converted=has?convert(t,reverseUnit,nu):0;reverseUnit=nu;reverseBar=null;renderReverseControls();if(has)$("targetWeight").value=fmt(converted)}}
+  if(e.target.matches(".reverseBarBtn")){reverseBar=+e.target.dataset.v;renderReverseControls();clearReverseResult()}
 });
 $("calculateReverse").onclick=calculateReverse;
 
@@ -297,7 +313,7 @@ function renderPercentage(){
   $("percentGrid").innerHTML=vals.map(p=>{const w=base*p/100;return `<button class="percent-card pctCard" data-weight="${w}"><span>${p}%</span><br><strong>${fmt(w)} ${pctUnit}</strong></button>`}).join("")
 }
 $("pctMovement").addEventListener("change",()=>{$("pctBaseWeight").value="";renderPercentage()});$("pctBaseWeight").addEventListener("input",renderPercentage);
-document.addEventListener("click",e=>{if(e.target.matches(".pctUnit")){const nu=e.target.dataset.unit;if(nu!==pctUnit){const v=Number($("pctBaseWeight").value);if(v)$("pctBaseWeight").value=fmt(convert(v,pctUnit,nu));pctUnit=nu;renderPercentage()}}if(e.target.closest(".pctCard")){const w=Number(e.target.closest(".pctCard").dataset.weight);reverseUnit=pctUnit;reverseBar=plateData[reverseUnit].bars[0];$("targetWeight").value=fmt(w);renderReverseControls();calculateReverse();showView("barbell");document.querySelectorAll(".calcTab").forEach(b=>b.classList.toggle("active",b.dataset.tab==="reverse"));$("buildPane").classList.add("hidden");$("reversePane").classList.remove("hidden")}});
+document.addEventListener("click",e=>{if(e.target.matches(".pctUnit")){const nu=e.target.dataset.unit;if(nu!==pctUnit){const v=Number($("pctBaseWeight").value);if(v)$("pctBaseWeight").value=fmt(convert(v,pctUnit,nu));pctUnit=nu;renderPercentage()}}if(e.target.closest(".pctCard")){const w=Number(e.target.closest(".pctCard").dataset.weight);if(reverseUnit!==pctUnit)reverseBar=null;reverseUnit=pctUnit;$("targetWeight").value=fmt(w);renderReverseControls();if(reverseBar!==null)calculateReverse();showView("barbell");document.querySelectorAll(".calcTab").forEach(b=>b.classList.toggle("active",b.dataset.tab==="reverse"));$("buildPane").classList.add("hidden");$("reversePane").classList.remove("hidden")}});
 
 /* settings */
 let prefUnit=state.preferredUnit;
@@ -316,7 +332,7 @@ $("prefAll").onclick=()=>{plateData[prefUnit].plates.forEach(p=>state.inventory[
 $("exportData").onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crossfit-tools-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500)
 };
-$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());state={...defaultState(),...obj,inventory:{lb:{...defaultState().inventory.lb,...(obj.inventory?.lb||{})},kg:{...defaultState().inventory.kg,...(obj.inventory?.kg||{})}},prs:Array.isArray(obj.prs)?obj.prs:[]};saveState();buildUnit=reverseUnit=pctUnit=state.preferredUnit;buildBar=plateData[buildUnit].bars[0];reverseBar=plateData[reverseUnit].bars[0];buildLoaded=[];renderBuild();renderReverseControls();renderSettings();renderPRs();renderPercentage();alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
+$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());state={...defaultState(),...obj,inventory:{lb:{...defaultState().inventory.lb,...(obj.inventory?.lb||{})},kg:{...defaultState().inventory.kg,...(obj.inventory?.kg||{})}},prs:Array.isArray(obj.prs)?obj.prs:[]};saveState();buildUnit=reverseUnit=pctUnit=state.preferredUnit;buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];$("targetWeight").value="";renderBuild();renderReverseControls();renderSettings();renderPRs();renderPercentage();alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
 
 initMovementSelects();renderBuild();renderReverseControls();renderPRs();renderPercentage();renderSettings();
 </script>
