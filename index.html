@@ -303,7 +303,7 @@ function renderPRs(){
       <div><div class="pr-name">${escapeHtml(m)}</div><div class="pr-meta">${escapeHtml(best.date)}${best.notes?` · ${escapeHtml(best.notes)}`:""}</div></div>
       <div><div class="pr-value">${fmt(convert(best.weight,best.unit,state.preferredUnit))} ${state.preferredUnit}</div>
       <div class="row" style="margin-top:6px;justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(best.id)}">Edit</button><button class="secondary newPR" data-movement="${escapeHtml(m)}">New PR</button><button class="secondary historyBtn" data-movement="${escapeHtml(m)}">History</button></div></div>
-      ${renderInlinePREditor("list",best.id)}
+      ${renderInlinePREditor("list",prEditor?.mode==="new"?m:best.id)}
     </div>`
   }).join("");
   renderPRHistory()
