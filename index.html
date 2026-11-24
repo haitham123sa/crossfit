@@ -59,8 +59,10 @@ textarea{min-height:80px}
 .pr-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;background:#fff}
 .pr-name{font-weight:800}.pr-value{font-size:22px;font-weight:800;text-align:right}.pr-meta{font-size:12px;color:var(--muted);margin-top:3px}.pr-change{font-size:12px;color:var(--good)}
 .history-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.pr-actions{grid-column:1/-1;justify-content:flex-end}.pr-inline-form{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;min-width:0}.pr-inline-form .section-title{letter-spacing:0;text-transform:none}.pr-inline-form label{display:block;min-width:0}.pr-inline-form textarea{min-height:72px}
 .percent-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.percent-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.percent-card strong{font-size:20px}
 .backup-box{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:460px){.pr-inline-form .grid2{grid-template-columns:1fr}.pr-actions{justify-content:flex-start}}
 @media(max-width:379px){header{gap:10px}.brand-logo{width:46px;height:46px}h1{font-size:26px}}
 @media(min-width:680px){.home-grid{grid-template-columns:repeat(4,1fr)}.inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.percent-grid{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:900px){.plate.large{height:120px}.plate.red{width:55px}.plate.blue{width:45px}.plate.yellow{width:35px}.plate.green{width:25px}.plate.black.large{width:20px}}
@@ -119,21 +121,9 @@ textarea{min-height:80px}
 </section>
 
 <section id="view-prs" class="hidden">
-  <div class="card" id="prFormCard">
-    <span class="section-title" id="prFormTitle">Add PR</span>
-    <div class="grid2">
-      <select id="prMovement"></select>
-      <input id="prWeight" class="input" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Weight">
-      <input id="prDate" class="input" type="date">
-      <div class="note" style="align-self:center">Weight unit: <strong id="prUnitLabel">kg</strong></div>
-    </div>
-    <textarea id="prNotes" placeholder="Optional notes"></textarea>
-    <div class="note hidden" id="prFormError" role="alert" style="color:#b42318;margin-top:8px"></div>
-    <div class="row" style="margin-top:10px"><button class="primary" id="savePR" style="flex:1">Save PR</button><button class="secondary hidden" id="cancelEditPR" type="button">Cancel</button></div>
-  </div>
-
   <div class="card">
-    <span class="section-title">Current PRs</span>
+    <span class="section-title">Personal Records</span>
+    <div class="note">Edit any current PR directly below, or tap New PR to record another lift. The current best and full history update automatically.</div>
     <div id="prList"></div>
   </div>
 
@@ -284,85 +274,128 @@ $("calculateReverse").onclick=calculateReverse;
 
 /* PRs */
 
-function initMovementSelects(){[$("prMovement"),$("pctMovement")].forEach(sel=>sel.innerHTML=movements.map(m=>`<option>${m}</option>`).join(""))}
+function initMovementSelects(){$("pctMovement").innerHTML=movements.map(m=>`<option>${m}</option>`).join("")}
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-let historyMovement=null,editingPrId=null,editPrWeightChanged=false;
-$("prDate").value=new Date().toISOString().slice(0,10);
-function renderPRForm(){
-  const editing=editingPrId!==null;
-  $("prFormTitle").textContent=editing?"Edit PR":"Add PR";
-  $("savePR").textContent=editing?"Save Changes":"Save PR";
-  $("cancelEditPR").classList.toggle("hidden",!editing);
-  $("prFormError").classList.add("hidden");
-  $("prFormError").textContent="";
-}
-function resetPRForm(){
-  editingPrId=null;editPrWeightChanged=false;
-  $("prMovement").value=movements[0];
-  $("prWeight").value="";$("prDate").value=new Date().toISOString().slice(0,10);$("prNotes").value="";
-  renderPRForm()
-}
-function startEditPR(id){
-  const pr=state.prs.find(x=>String(x.id)===String(id));
-  if(!pr)return;
-  editingPrId=String(pr.id);editPrWeightChanged=false;
-  $("prMovement").value=movements.includes(pr.movement)?pr.movement:movements[0];
-  $("prWeight").value=fmt(convert(pr.weight,pr.unit,state.preferredUnit));
-  $("prDate").value=pr.date;
-  $("prNotes").value=pr.notes||"";
-  renderPRForm();
-  $("prFormCard").scrollIntoView?.({behavior:"smooth",block:"start"});
-  $("prWeight").focus()
-}
-$("prWeight").addEventListener("input",()=>{if(editingPrId!==null)editPrWeightChanged=true});
-$("cancelEditPR").onclick=resetPRForm;
-$("savePR").onclick=()=>{
-  const movement=$("prMovement").value,raw=$("prWeight").value.trim(),weight=Number(raw),date=$("prDate").value,notes=$("prNotes").value.trim();
-  if(!movements.includes(movement)||raw===""||!Number.isFinite(weight)||weight<=0||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+"T00:00:00Z"))){
-    $("prFormError").textContent="Enter a valid movement, positive weight, and date.";
-    $("prFormError").classList.remove("hidden");return
-  }
-  if(editingPrId!==null){
-    const i=state.prs.findIndex(x=>String(x.id)===editingPrId);
-    if(i<0){resetPRForm();renderPRs();return}
-    const previous=state.prs[i];
-    state.prs[i]={...previous,movement,weight:editPrWeightChanged?weight:previous.weight,unit:editPrWeightChanged?state.preferredUnit:previous.unit,date,notes};
-    if(historyMovement===previous.movement&&movement!==previous.movement)historyMovement=movement
-  }else{
-    const id=state.prs.reduce((max,x)=>Math.max(max,Number(x.id)||0),Date.now())+1;
-    state.prs.push({id,movement,weight,unit:state.preferredUnit,date,notes})
-  }
-  saveState();resetPRForm();renderPRs();renderPercentage()
-};
+let historyMovement=null,prEditor=null;
 function prsForMovement(m){return state.prs.filter(x=>x.movement===m).sort((a,b)=>new Date(b.date)-new Date(a.date)||b.id-a.id)}
 function bestPR(m){
   const list=state.prs.filter(x=>x.movement===m);if(!list.length)return null;
   return list.reduce((best,x)=>convert(x.weight,x.unit,state.preferredUnit)>convert(best.weight,best.unit,state.preferredUnit)?x:best)
 }
+function renderInlinePREditor(place,id){
+  if(!prEditor||prEditor.place!==place||(prEditor.mode==="edit"&&String(id)!==prEditor.id)||(prEditor.mode==="new"&&prEditor.movement!==id))return "";
+  const heading=prEditor.mode==="edit"?"Correct this PR":"Record new PR";
+  return `<div class="pr-inline-form" aria-label="${escapeHtml(heading)} for ${escapeHtml(prEditor.movement)}">
+    <div class="section-title">${heading}: ${escapeHtml(prEditor.movement)}</div>
+    <div class="grid2">
+      <label><span class="section-title">Weight (${state.preferredUnit})</span><input class="input prEditField" type="number" min="0" step="any" inputmode="decimal" data-field="weightText" value="${escapeHtml(prEditor.weightText)}" aria-label="PR weight in ${state.preferredUnit}"></label>
+      <label><span class="section-title">Date</span><input class="input prEditField" type="date" data-field="date" value="${escapeHtml(prEditor.date)}" aria-label="PR date"></label>
+      <label style="grid-column:1/-1"><span class="section-title">Notes (optional)</span><textarea class="prEditField" data-field="notes" rows="2" aria-label="PR notes">${escapeHtml(prEditor.notes)}</textarea></label>
+    </div>
+    ${prEditor.error?`<div class="note" role="alert" style="color:#b42318;margin-top:8px">${escapeHtml(prEditor.error)}</div>`:""}
+    <div class="row" style="margin-top:10px"><button class="primary savePREdit" style="flex:1">${prEditor.mode==="edit"?"Save Changes":"Save PR"}</button><button class="secondary cancelPREdit">Cancel</button></div>
+  </div>`
+}
 function renderPRs(){
-  const cards=movements.map(m=>{const best=bestPR(m);if(!best)return `<div class="pr-card"><div><div class="pr-name">${m}</div><div class="pr-meta">No PR yet</div></div><button class="secondary historyBtn" data-movement="${m}">History</button></div>`;
-    const list=prsForMovement(m),converted=convert(best.weight,best.unit,state.preferredUnit),previous=list.filter(x=>x.id!==best.id).sort((a,b)=>convert(b.weight,b.unit,state.preferredUnit)-convert(a.weight,a.unit,state.preferredUnit))[0];
-    const change=previous?converted-convert(previous.weight,previous.unit,state.preferredUnit):null;
-    return `<div class="pr-card"><div><div class="pr-name">${m}</div><div class="pr-meta">${escapeHtml(best.date)}${best.notes?` · ${escapeHtml(best.notes)}`:""}</div>${change>0?`<div class="pr-change">+${fmt(change)} ${state.preferredUnit}</div>`:""}</div><div><div class="pr-value">${fmt(converted)} ${state.preferredUnit}</div><div class="row" style="margin-top:6px;justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(best.id)}">Edit</button><button class="secondary historyBtn" data-movement="${m}">History</button></div></div></div>`}).join("");
-  $("prList").innerHTML=cards;renderPRHistory()
+  $("prList").innerHTML=movements.map(m=>{
+    const best=bestPR(m);
+    if(!best)return `<div class="pr-card"><div><div class="pr-name">${escapeHtml(m)}</div><div class="pr-meta">No PR yet</div></div><button class="secondary newPR" data-movement="${escapeHtml(m)}">Add PR</button>${renderInlinePREditor("list",m)}</div>`;
+    return `<div class="pr-card">
+      <div><div class="pr-name">${escapeHtml(m)}</div><div class="pr-meta">${escapeHtml(best.date)}${best.notes?` · ${escapeHtml(best.notes)}`:""}</div></div>
+      <div class="pr-value">${fmt(convert(best.weight,best.unit,state.preferredUnit))} ${state.preferredUnit}</div>
+      <div class="row pr-actions"><button class="secondary editPR" data-id="${escapeHtml(best.id)}">Edit</button><button class="secondary newPR" data-movement="${escapeHtml(m)}">New PR</button><button class="secondary historyBtn" data-movement="${escapeHtml(m)}">History</button></div>
+      ${renderInlinePREditor("list",prEditor?.mode==="new"?m:best.id)}
+    </div>`
+  }).join("");
+  renderPRHistory()
 }
 function renderPRHistory(){
   if(!historyMovement){$("prHistoryCard").classList.add("hidden");$("prHistory").innerHTML="";return}
   const list=prsForMovement(historyMovement);$("historyTitle").textContent=historyMovement;
-  $("prHistory").innerHTML=list.length?list.map(x=>`<div class="history-row"><div><strong>${fmt(convert(x.weight,x.unit,state.preferredUnit))} ${state.preferredUnit}</strong><div class="pr-meta">${escapeHtml(x.date)}${x.notes?` · ${escapeHtml(x.notes)}`:""}</div></div><div class="row" style="justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(x.id)}">Edit</button><button class="secondary deletePR" data-id="${escapeHtml(x.id)}">Delete</button></div></div>`).join(""):"No history";
+  $("prHistory").innerHTML=list.length?list.map(x=>`<div class="history-row">
+    <div><strong>${fmt(convert(x.weight,x.unit,state.preferredUnit))} ${state.preferredUnit}</strong><div class="pr-meta">${escapeHtml(x.date)}${x.notes?` · ${escapeHtml(x.notes)}`:""}</div></div>
+    <div class="row" style="justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(x.id)}" data-place="history">Edit</button><button class="secondary deletePR" data-id="${escapeHtml(x.id)}">Delete</button></div>
+    ${renderInlinePREditor("history",x.id)}
+  </div>`).join(""):"No history";
   $("prHistoryCard").classList.remove("hidden")
 }
+function openPREditor({movement,id,place="list"}){
+  const record=id===undefined?null:state.prs.find(x=>String(x.id)===String(id));
+  if(id!==undefined&&!record)return;
+  const m=record?record.movement:movement;
+  if(!movements.includes(m))return;
+  prEditor={
+    mode:record?"edit":"new",place,id:record?String(record.id):null,movement:m,
+    weightText:record?fmt(convert(record.weight,record.unit,state.preferredUnit)):"",
+    weightChanged:false,
+    date:record?record.date:new Date().toISOString().slice(0,10),
+    notes:record?record.notes||"":"",
+    error:""
+  };
+  renderPRs();
+  const input=document.querySelector(".pr-inline-form .prEditField");
+  input?.focus()
+}
+function capturePREditField(e){
+  const input=e.target.closest(".prEditField");
+  if(!prEditor||!input)return;
+  const field=input.dataset.field;
+  if(!["weightText","date","notes"].includes(field))return;
+  prEditor[field]=input.value;
+  if(field==="weightText")prEditor.weightChanged=true;
+}
+function validPRDate(text){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(text))return false;
+  const d=new Date(text+"T00:00:00Z");
+  return !Number.isNaN(d.getTime())&&d.toISOString().slice(0,10)===text
+}
+function savePREditor(){
+  if(!prEditor)return;
+  const raw=prEditor.weightText.trim(),weight=Number(raw);
+  if(!raw||!Number.isFinite(weight)||weight<=0||!validPRDate(prEditor.date)){
+    prEditor.error="Enter a positive weight and a valid date.";renderPRs();return
+  }
+  if(prEditor.mode==="edit"){
+    const idx=state.prs.findIndex(x=>String(x.id)===prEditor.id);
+    if(idx<0){prEditor=null;renderPRs();return}
+    const old=state.prs[idx];
+    state.prs[idx]={...old,date:prEditor.date,notes:prEditor.notes.trim(),
+      weight:prEditor.weightChanged?weight:old.weight,
+      unit:prEditor.weightChanged?state.preferredUnit:old.unit}
+  }else{
+    const id=state.prs.reduce((max,x)=>Math.max(max,Number(x.id)||0),Date.now())+1;
+    state.prs.push({id,movement:prEditor.movement,weight,unit:state.preferredUnit,date:prEditor.date,notes:prEditor.notes.trim()})
+  }
+  prEditor=null;saveState();renderPRs();$("pctBaseWeight").value="";renderPercentage()
+}
+function convertPREditorUnit(oldUnit,newUnit){
+  if(!prEditor)return;
+  if(prEditor.mode==="edit"&&!prEditor.weightChanged){
+    const original=state.prs.find(x=>String(x.id)===prEditor.id);
+    if(original)prEditor.weightText=fmt(convert(original.weight,original.unit,newUnit));
+  }else if(prEditor.weightText.trim()!==""){
+    const w=Number(prEditor.weightText);
+    if(Number.isFinite(w))prEditor.weightText=fmt(convert(w,oldUnit,newUnit))
+  }
+}
+document.addEventListener("input",capturePREditField);
+document.addEventListener("change",capturePREditField);
 document.addEventListener("click",e=>{
-  if(e.target.matches(".historyBtn")){historyMovement=e.target.dataset.movement;renderPRHistory()}
-  if(e.target.matches(".editPR"))startEditPR(e.target.dataset.id);
-  if(e.target.matches(".deletePR")){
-    const id=e.target.dataset.id;
+  const target=e.target.closest("button");
+  if(!target)return;
+  if(target.classList.contains("newPR"))openPREditor({movement:target.dataset.movement});
+  if(target.classList.contains("editPR"))openPREditor({id:target.dataset.id,place:target.dataset.place||"list"});
+  if(target.classList.contains("cancelPREdit")){prEditor=null;renderPRs()}
+  if(target.classList.contains("savePREdit"))savePREditor();
+  if(target.classList.contains("historyBtn")){historyMovement=target.dataset.movement;renderPRHistory()}
+  if(target.classList.contains("deletePR")){
+    const id=target.dataset.id;
     state.prs=state.prs.filter(x=>String(x.id)!==id);saveState();
-    if(editingPrId===id)resetPRForm();
-    historyMovement=null;renderPRs();renderPercentage()
+    if(prEditor?.id===id)prEditor=null;
+    renderPRs();$("pctBaseWeight").value="";renderPercentage()
   }
 });
-$("closeHistory").onclick=()=>{historyMovement=null;renderPRHistory()};
+$("closeHistory").onclick=()=>{historyMovement=null;if(prEditor?.place==="history")prEditor=null;renderPRs()};
 
 /* percentages */
 function renderPercentage(fillFromPR=true){
@@ -380,8 +413,7 @@ function renderSettings(){
 }
 function renderAppUnitLabels(){
   const unit=state.preferredUnit;$("appUnitLabel").textContent=unit.toUpperCase();
-  ["prUnitLabel","targetUnitLabel","inventoryUnitLabel"].forEach(id=>$(id).textContent=unit);
-  $("prWeight").placeholder=`Weight (${unit})`;$("prWeight").setAttribute("aria-label",`PR weight in ${unit}`);
+  ["targetUnitLabel","inventoryUnitLabel"].forEach(id=>$(id).textContent=unit);
   $("pctBaseWeight").placeholder=`1RM / base weight (${unit})`;$("pctBaseWeight").setAttribute("aria-label",`1RM or base weight in ${unit}`);
   $("targetWeight").placeholder=unit==="kg"?"e.g. 100":"e.g. 225";$("targetWeight").setAttribute("aria-label",`Target total weight in ${unit}`);
 }
@@ -390,7 +422,8 @@ function setAppUnit(newUnit){
   if(!["kg","lb"].includes(newUnit)||newUnit===state.preferredUnit)return;
   const oldUnit=state.preferredUnit,total=buildBar===null?buildTarget:buildBar+buildLoaded.reduce((s,p)=>s+2*p,0);
   buildTarget=total===null?null:convert(total,oldUnit,newUnit);
-  ["targetWeight","pctBaseWeight","prWeight"].forEach(id=>{const input=$(id),value=Number(input.value);if(input.value.trim()!==""&&Number.isFinite(value))input.value=fmt(convert(value,oldUnit,newUnit))});
+  ["targetWeight","pctBaseWeight"].forEach(id=>{const input=$(id),value=Number(input.value);if(input.value.trim()!==""&&Number.isFinite(value))input.value=fmt(convert(value,oldUnit,newUnit))});
+  convertPREditorUnit(oldUnit,newUnit);
   state.preferredUnit=newUnit;saveState();buildBar=reverseBar=null;buildLoaded=[];buildHistory=[];renderApp(false)
 }
 document.addEventListener("click",e=>{if(e.target.matches(".settingUnit"))setAppUnit(e.target.dataset.unit)});
@@ -401,9 +434,9 @@ $("prefAll").onclick=()=>{plateData[state.preferredUnit].plates.forEach(p=>state
 $("exportData").onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crossfit-tools-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500)
 };
-$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];historyMovement=null;resetPRForm();["targetWeight","pctBaseWeight","prWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
+$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];historyMovement=null;prEditor=null;["targetWeight","pctBaseWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
 
-initMovementSelects();renderPRForm();renderApp();
+initMovementSelects();renderApp();
 </script>
 <script>
 if ("serviceWorker" in navigator) {
