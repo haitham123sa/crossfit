@@ -59,7 +59,7 @@ textarea{min-height:80px}
 .pr-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;background:#fff}
 .pr-name{font-weight:800}.pr-value{font-size:22px;font-weight:800;text-align:right}.pr-meta{font-size:12px;color:var(--muted);margin-top:3px}.pr-change{font-size:12px;color:var(--good)}
 .history-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-.pr-actions{grid-column:1/-1;justify-content:flex-end}.pr-inline-form{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;min-width:0}.pr-inline-form .section-title{letter-spacing:0;text-transform:none}.pr-inline-form label{display:block;min-width:0}.pr-inline-form textarea{min-height:72px}
+.pr-actions{grid-column:1/-1;justify-content:flex-end}.pr-history-entry{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-top:1px solid var(--line)}#prHistoryDisclosure>summary{cursor:pointer;font-weight:800;font-size:17px;list-style-position:inside}#prHistoryDisclosure[open]>summary{margin-bottom:4px}.pr-history-entry .history-details{min-width:0}.pr-history-entry .history-actions{justify-content:flex-end;align-items:center}.pr-inline-form{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;min-width:0}.pr-inline-form .section-title{letter-spacing:0;text-transform:none}.pr-inline-form label{display:block;min-width:0}.pr-inline-form textarea{min-height:72px}
 .percent-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.percent-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.percent-card strong{font-size:20px}
 .backup-box{display:flex;gap:8px;flex-wrap:wrap}
 @media(max-width:460px){.pr-inline-form .grid2{grid-template-columns:1fr}.pr-actions{justify-content:flex-start}}
@@ -123,16 +123,18 @@ textarea{min-height:80px}
 <section id="view-prs" class="hidden">
   <div class="card">
     <span class="section-title">Personal Records</span>
-    <div class="note">Edit any current PR directly below, or tap New PR to record another lift. The current best and full history update automatically.</div>
-    <div id="prList"></div>
+    <div class="note">Edit a current PR, or tap New PR to record another lift. All saved attempts remain in history until you delete them.</div>
   </div>
 
-  <div id="prHistoryCard" class="card hidden">
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <div><span class="section-title" style="margin:0">PR History</span><strong id="historyTitle"></strong></div>
-      <button class="secondary" id="closeHistory">Close</button>
-    </div>
+  <details id="prHistoryDisclosure" class="card">
+    <summary id="prHistorySummary">All PR History</summary>
+    <div class="note" style="margin-top:10px">Every saved PR appears here, newest first. You can edit or delete individual entries.</div>
     <div id="prHistory"></div>
+  </details>
+
+  <div class="card">
+    <span class="section-title">Current PRs</span>
+    <div id="prList"></div>
   </div>
 </section>
 
@@ -276,7 +278,7 @@ $("calculateReverse").onclick=calculateReverse;
 
 function initMovementSelects(){$("pctMovement").innerHTML=movements.map(m=>`<option>${m}</option>`).join("")}
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-let historyMovement=null,prEditor=null;
+let prEditor=null;
 function prsForMovement(m){return state.prs.filter(x=>x.movement===m).sort((a,b)=>new Date(b.date)-new Date(a.date)||b.id-a.id)}
 function bestPR(m){
   const list=state.prs.filter(x=>x.movement===m);if(!list.length)return null;
@@ -310,14 +312,19 @@ function renderPRs(){
   renderPRHistory()
 }
 function renderPRHistory(){
-  if(!historyMovement){$("prHistoryCard").classList.add("hidden");$("prHistory").innerHTML="";return}
-  const list=prsForMovement(historyMovement);$("historyTitle").textContent=historyMovement;
-  $("prHistory").innerHTML=list.length?list.map(x=>`<div class="history-row">
-    <div><strong>${fmt(convert(x.weight,x.unit,state.preferredUnit))} ${state.preferredUnit}</strong><div class="pr-meta">${escapeHtml(x.date)}${x.notes?` · ${escapeHtml(x.notes)}`:""}</div></div>
-    <div class="row" style="justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(x.id)}" data-place="history">Edit</button><button class="secondary deletePR" data-id="${escapeHtml(x.id)}">Delete</button></div>
+  const records=[...state.prs].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))||(Number(b.id)||0)-(Number(a.id)||0));
+  $("prHistorySummary").textContent=`All PR History (${records.length})`;
+  $("prHistory").innerHTML=records.length?records.map(x=>`<div class="pr-history-entry">
+    <div class="history-details"><strong>${escapeHtml(x.movement)}</strong><div class="pr-meta">${escapeHtml(x.date)}${x.notes?` · ${escapeHtml(x.notes)}`:""}</div></div>
+    <div><strong>${fmt(convert(x.weight,x.unit,state.preferredUnit))} ${state.preferredUnit}</strong></div>
+    <div class="row history-actions" style="grid-column:1/-1"><button class="secondary editPR" data-id="${escapeHtml(x.id)}" data-place="history" aria-label="Edit ${escapeHtml(x.movement)} PR from ${escapeHtml(x.date)}">Edit</button><button class="secondary deletePR" data-id="${escapeHtml(x.id)}" aria-label="Delete ${escapeHtml(x.movement)} PR from ${escapeHtml(x.date)}">Delete</button></div>
     ${renderInlinePREditor("history",x.id)}
-  </div>`).join(""):"No history";
-  $("prHistoryCard").classList.remove("hidden")
+  </div>`).join(""):"<p class=\"note\">No saved PRs yet.</p>"
+}
+function openAllPRHistory(){
+  renderPRHistory();
+  $("prHistoryDisclosure").open=true;
+  $("prHistoryDisclosure").scrollIntoView?.({behavior:"smooth",block:"start"})
 }
 function openPREditor({movement,id,place="list"}){
   const record=id===undefined?null:state.prs.find(x=>String(x.id)===String(id));
@@ -387,15 +394,17 @@ document.addEventListener("click",e=>{
   if(target.classList.contains("editPR"))openPREditor({id:target.dataset.id,place:target.dataset.place||"list"});
   if(target.classList.contains("cancelPREdit")){prEditor=null;renderPRs()}
   if(target.classList.contains("savePREdit"))savePREditor();
-  if(target.classList.contains("historyBtn")){historyMovement=target.dataset.movement;renderPRHistory()}
+  if(target.classList.contains("historyBtn"))openAllPRHistory();
   if(target.classList.contains("deletePR")){
-    const id=target.dataset.id;
-    state.prs=state.prs.filter(x=>String(x.id)!==id);saveState();
+    const id=target.dataset.id,idx=state.prs.findIndex(x=>String(x.id)===id);
+    if(idx<0)return;
+    const entry=state.prs[idx];
+    if(!window.confirm(`Delete the ${entry.movement} PR from ${entry.date} (${fmt(convert(entry.weight,entry.unit,state.preferredUnit))} ${state.preferredUnit})? This cannot be undone.`))return;
+    state.prs.splice(idx,1);saveState();
     if(prEditor?.id===id)prEditor=null;
     renderPRs();$("pctBaseWeight").value="";renderPercentage()
   }
 });
-$("closeHistory").onclick=()=>{historyMovement=null;if(prEditor?.place==="history")prEditor=null;renderPRs()};
 
 /* percentages */
 function renderPercentage(fillFromPR=true){
@@ -434,7 +443,7 @@ $("prefAll").onclick=()=>{plateData[state.preferredUnit].plates.forEach(p=>state
 $("exportData").onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crossfit-tools-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500)
 };
-$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];historyMovement=null;prEditor=null;["targetWeight","pctBaseWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
+$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];prEditor=null;["targetWeight","pctBaseWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
 
 initMovementSelects();renderApp();
 </script>
