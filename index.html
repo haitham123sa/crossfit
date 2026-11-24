@@ -119,8 +119,8 @@ textarea{min-height:80px}
 </section>
 
 <section id="view-prs" class="hidden">
-  <div class="card">
-    <span class="section-title">Add PR</span>
+  <div class="card" id="prFormCard">
+    <span class="section-title" id="prFormTitle">Add PR</span>
     <div class="grid2">
       <select id="prMovement"></select>
       <input id="prWeight" class="input" type="number" min="0" step="0.25" inputmode="decimal" placeholder="Weight">
@@ -128,7 +128,8 @@ textarea{min-height:80px}
       <div class="note" style="align-self:center">Weight unit: <strong id="prUnitLabel">kg</strong></div>
     </div>
     <textarea id="prNotes" placeholder="Optional notes"></textarea>
-    <button class="primary" id="savePR" style="margin-top:10px">Save PR</button>
+    <div class="note hidden" id="prFormError" role="alert" style="color:#b42318;margin-top:8px"></div>
+    <div class="row" style="margin-top:10px"><button class="primary" id="savePR" style="flex:1">Save PR</button><button class="secondary hidden" id="cancelEditPR" type="button">Cancel</button></div>
   </div>
 
   <div class="card">
@@ -282,13 +283,56 @@ document.addEventListener("click",e=>{
 $("calculateReverse").onclick=calculateReverse;
 
 /* PRs */
+
 function initMovementSelects(){[$("prMovement"),$("pctMovement")].forEach(sel=>sel.innerHTML=movements.map(m=>`<option>${m}</option>`).join(""))}
-let historyMovement=null;
+function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+let historyMovement=null,editingPrId=null,editPrWeightChanged=false;
 $("prDate").value=new Date().toISOString().slice(0,10);
+function renderPRForm(){
+  const editing=editingPrId!==null;
+  $("prFormTitle").textContent=editing?"Edit PR":"Add PR";
+  $("savePR").textContent=editing?"Save Changes":"Save PR";
+  $("cancelEditPR").classList.toggle("hidden",!editing);
+  $("prFormError").classList.add("hidden");
+  $("prFormError").textContent="";
+}
+function resetPRForm(){
+  editingPrId=null;editPrWeightChanged=false;
+  $("prMovement").value=movements[0];
+  $("prWeight").value="";$("prDate").value=new Date().toISOString().slice(0,10);$("prNotes").value="";
+  renderPRForm()
+}
+function startEditPR(id){
+  const pr=state.prs.find(x=>String(x.id)===String(id));
+  if(!pr)return;
+  editingPrId=String(pr.id);editPrWeightChanged=false;
+  $("prMovement").value=movements.includes(pr.movement)?pr.movement:movements[0];
+  $("prWeight").value=fmt(convert(pr.weight,pr.unit,state.preferredUnit));
+  $("prDate").value=pr.date;
+  $("prNotes").value=pr.notes||"";
+  renderPRForm();
+  $("prFormCard").scrollIntoView?.({behavior:"smooth",block:"start"});
+  $("prWeight").focus()
+}
+$("prWeight").addEventListener("input",()=>{if(editingPrId!==null)editPrWeightChanged=true});
+$("cancelEditPR").onclick=resetPRForm;
 $("savePR").onclick=()=>{
-  const movement=$("prMovement").value,weight=Number($("prWeight").value),date=$("prDate").value,unit=state.preferredUnit,notes=$("prNotes").value.trim();
-  if(!movement||!weight||!date)return;
-  state.prs.push({id:Date.now(),movement,weight,unit,date,notes});saveState();$("prWeight").value="";$("prNotes").value="";renderPRs()
+  const movement=$("prMovement").value,raw=$("prWeight").value.trim(),weight=Number(raw),date=$("prDate").value,notes=$("prNotes").value.trim();
+  if(!movements.includes(movement)||raw===""||!Number.isFinite(weight)||weight<=0||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+"T00:00:00Z"))){
+    $("prFormError").textContent="Enter a valid movement, positive weight, and date.";
+    $("prFormError").classList.remove("hidden");return
+  }
+  if(editingPrId!==null){
+    const i=state.prs.findIndex(x=>String(x.id)===editingPrId);
+    if(i<0){resetPRForm();renderPRs();return}
+    const previous=state.prs[i];
+    state.prs[i]={...previous,movement,weight:editPrWeightChanged?weight:previous.weight,unit:editPrWeightChanged?state.preferredUnit:previous.unit,date,notes};
+    if(historyMovement===previous.movement&&movement!==previous.movement)historyMovement=movement
+  }else{
+    const id=state.prs.reduce((max,x)=>Math.max(max,Number(x.id)||0),Date.now())+1;
+    state.prs.push({id,movement,weight,unit:state.preferredUnit,date,notes})
+  }
+  saveState();resetPRForm();renderPRs();renderPercentage()
 };
 function prsForMovement(m){return state.prs.filter(x=>x.movement===m).sort((a,b)=>new Date(b.date)-new Date(a.date)||b.id-a.id)}
 function bestPR(m){
@@ -299,16 +343,25 @@ function renderPRs(){
   const cards=movements.map(m=>{const best=bestPR(m);if(!best)return `<div class="pr-card"><div><div class="pr-name">${m}</div><div class="pr-meta">No PR yet</div></div><button class="secondary historyBtn" data-movement="${m}">History</button></div>`;
     const list=prsForMovement(m),converted=convert(best.weight,best.unit,state.preferredUnit),previous=list.filter(x=>x.id!==best.id).sort((a,b)=>convert(b.weight,b.unit,state.preferredUnit)-convert(a.weight,a.unit,state.preferredUnit))[0];
     const change=previous?converted-convert(previous.weight,previous.unit,state.preferredUnit):null;
-    return `<div class="pr-card"><div><div class="pr-name">${m}</div><div class="pr-meta">${best.date}${best.notes?` · ${best.notes}`:""}</div>${change>0?`<div class="pr-change">+${fmt(change)} ${state.preferredUnit}</div>`:""}</div><div><div class="pr-value">${fmt(converted)} ${state.preferredUnit}</div><button class="secondary historyBtn" data-movement="${m}" style="margin-top:6px">History</button></div></div>`}).join("");
+    return `<div class="pr-card"><div><div class="pr-name">${m}</div><div class="pr-meta">${escapeHtml(best.date)}${best.notes?` · ${escapeHtml(best.notes)}`:""}</div>${change>0?`<div class="pr-change">+${fmt(change)} ${state.preferredUnit}</div>`:""}</div><div><div class="pr-value">${fmt(converted)} ${state.preferredUnit}</div><div class="row" style="margin-top:6px;justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(best.id)}">Edit</button><button class="secondary historyBtn" data-movement="${m}">History</button></div></div></div>`}).join("");
   $("prList").innerHTML=cards;renderPRHistory()
 }
 function renderPRHistory(){
   if(!historyMovement){$("prHistoryCard").classList.add("hidden");$("prHistory").innerHTML="";return}
   const list=prsForMovement(historyMovement);$("historyTitle").textContent=historyMovement;
-  $("prHistory").innerHTML=list.length?list.map(x=>`<div class="history-row"><div><strong>${fmt(convert(x.weight,x.unit,state.preferredUnit))} ${state.preferredUnit}</strong><div class="pr-meta">${x.date}${x.notes?` · ${x.notes}`:""}</div></div><button class="secondary deletePR" data-id="${x.id}">Delete</button></div>`).join(""):"No history";
+  $("prHistory").innerHTML=list.length?list.map(x=>`<div class="history-row"><div><strong>${fmt(convert(x.weight,x.unit,state.preferredUnit))} ${state.preferredUnit}</strong><div class="pr-meta">${escapeHtml(x.date)}${x.notes?` · ${escapeHtml(x.notes)}`:""}</div></div><div class="row" style="justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(x.id)}">Edit</button><button class="secondary deletePR" data-id="${escapeHtml(x.id)}">Delete</button></div></div>`).join(""):"No history";
   $("prHistoryCard").classList.remove("hidden")
 }
-document.addEventListener("click",e=>{if(e.target.matches(".historyBtn")){historyMovement=e.target.dataset.movement;renderPRHistory()}if(e.target.matches(".deletePR")){state.prs=state.prs.filter(x=>x.id!==Number(e.target.dataset.id));saveState();historyMovement=null;renderPRs()}});
+document.addEventListener("click",e=>{
+  if(e.target.matches(".historyBtn")){historyMovement=e.target.dataset.movement;renderPRHistory()}
+  if(e.target.matches(".editPR"))startEditPR(e.target.dataset.id);
+  if(e.target.matches(".deletePR")){
+    const id=e.target.dataset.id;
+    state.prs=state.prs.filter(x=>String(x.id)!==id);saveState();
+    if(editingPrId===id)resetPRForm();
+    historyMovement=null;renderPRs();renderPercentage()
+  }
+});
 $("closeHistory").onclick=()=>{historyMovement=null;renderPRHistory()};
 
 /* percentages */
@@ -348,9 +401,9 @@ $("prefAll").onclick=()=>{plateData[state.preferredUnit].plates.forEach(p=>state
 $("exportData").onclick=()=>{
   const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crossfit-tools-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500)
 };
-$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];historyMovement=null;["targetWeight","pctBaseWeight","prWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
+$("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];historyMovement=null;resetPRForm();["targetWeight","pctBaseWeight","prWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
 
-initMovementSelects();renderApp();
+initMovementSelects();renderPRForm();renderApp();
 </script>
 <script>
 if ("serviceWorker" in navigator) {
