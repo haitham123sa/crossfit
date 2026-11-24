@@ -59,9 +59,10 @@ textarea{min-height:80px}
 .pr-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;background:#fff}
 .pr-name{font-weight:800}.pr-value{font-size:22px;font-weight:800;text-align:right}.pr-meta{font-size:12px;color:var(--muted);margin-top:3px}.pr-change{font-size:12px;color:var(--good)}
 .history-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-.pr-inline-form{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;min-width:0}.pr-inline-form .section-title{letter-spacing:0;text-transform:none}.pr-inline-form label{display:block;min-width:0}.pr-inline-form textarea{min-height:72px}
+.pr-actions{grid-column:1/-1;justify-content:flex-end}.pr-inline-form{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;min-width:0}.pr-inline-form .section-title{letter-spacing:0;text-transform:none}.pr-inline-form label{display:block;min-width:0}.pr-inline-form textarea{min-height:72px}
 .percent-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.percent-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.percent-card strong{font-size:20px}
 .backup-box{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:460px){.pr-inline-form .grid2{grid-template-columns:1fr}.pr-actions{justify-content:flex-start}}
 @media(max-width:379px){header{gap:10px}.brand-logo{width:46px;height:46px}h1{font-size:26px}}
 @media(min-width:680px){.home-grid{grid-template-columns:repeat(4,1fr)}.inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.percent-grid{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:900px){.plate.large{height:120px}.plate.red{width:55px}.plate.blue{width:45px}.plate.yellow{width:35px}.plate.green{width:25px}.plate.black.large{width:20px}}
@@ -301,8 +302,8 @@ function renderPRs(){
     if(!best)return `<div class="pr-card"><div><div class="pr-name">${escapeHtml(m)}</div><div class="pr-meta">No PR yet</div></div><button class="secondary newPR" data-movement="${escapeHtml(m)}">Add PR</button>${renderInlinePREditor("list",m)}</div>`;
     return `<div class="pr-card">
       <div><div class="pr-name">${escapeHtml(m)}</div><div class="pr-meta">${escapeHtml(best.date)}${best.notes?` · ${escapeHtml(best.notes)}`:""}</div></div>
-      <div><div class="pr-value">${fmt(convert(best.weight,best.unit,state.preferredUnit))} ${state.preferredUnit}</div>
-      <div class="row" style="margin-top:6px;justify-content:flex-end"><button class="secondary editPR" data-id="${escapeHtml(best.id)}">Edit</button><button class="secondary newPR" data-movement="${escapeHtml(m)}">New PR</button><button class="secondary historyBtn" data-movement="${escapeHtml(m)}">History</button></div></div>
+      <div class="pr-value">${fmt(convert(best.weight,best.unit,state.preferredUnit))} ${state.preferredUnit}</div>
+      <div class="row pr-actions"><button class="secondary editPR" data-id="${escapeHtml(best.id)}">Edit</button><button class="secondary newPR" data-movement="${escapeHtml(m)}">New PR</button><button class="secondary historyBtn" data-movement="${escapeHtml(m)}">History</button></div>
       ${renderInlinePREditor("list",prEditor?.mode==="new"?m:best.id)}
     </div>`
   }).join("");
