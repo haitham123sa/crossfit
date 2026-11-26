@@ -24,6 +24,16 @@ Do not add a billing account or upgrade to Blaze. Do not enable SMS/Phone auth, 
 - If Firebase cannot initialize or an unauthenticated user is offline, the sign-in gate remains locked; access requires an authenticated session. This is a UI gate, **not a server-side authorization boundary**: Firestore rules protect cloud records.
 - A returning signed-in session may work offline if its Firebase authentication libraries and session can load from device cache, but this has not been verified on a physical iPhone. Keep a JSON backup.
 
+## Google sign-in (enabled November 26, 2026)
+
+- **Google Authentication** is enabled in Firebase project `h-forge` alongside Email/Password Authentication.
+- New users can tap **Continue with Google** on the H-FORGE welcome screen.
+- Users with existing H-FORGE email/password accounts must sign in normally, then go to **Settings → Account & Cloud Sync → Link Google account**. Linking preserves their existing Firebase UID and therefore their PRs and personal preferences.
+- Google identity collisions (for example, email already tied to a different method) are not automatically merged. Sign in with the existing method, then link Google from Settings.
+- On GitHub Pages, Firebase's browser popup OAuth flow is used because redirect-based OAuth requires additional cross-origin storage/proxy setup for modern Safari. Mobile popup blockers can interfere; if this happens in the iPhone Home Screen app, open H-FORGE in Safari.
+- Google sign-in uses the Firebase project's existing free **Spark** Authentication provider. Never upgrade to Identity Platform or Blaze solely for this feature.
+- Test on iPhone and other devices before broad use.
+
 ## How accounts work
 
 - **Settings → Account & Cloud Sync**: create an account or sign in using email and password.
