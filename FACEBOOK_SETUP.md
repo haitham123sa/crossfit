@@ -1,3 +1,25 @@
+# H-FORGE Facebook Login setup — Meta project created
+
+**Current status:** The connected Meta for Developers account now has an **H-FORGE** app, Meta App ID **1154248590649927**, currently in **Development / Unpublished** mode. The H-FORGE site keeps Facebook sign-in disabled for visitors pending Meta readiness.
+
+**Meta app website URL:** https://haitham123sa.github.io/crossfit/
+
+**Meta-required public pages:**
+- Privacy: https://haitham123sa.github.io/crossfit/privacy.html
+- User deletion: https://haitham123sa.github.io/crossfit/delete-data.html
+- Official H-FORGE brand icon: https://haitham123sa.github.io/crossfit/assets/icon-512.png?v=4 (requires a 1024x1024 upload to Meta if Meta enforces 1024 resolution)
+
+**Meta Facebook Login OAuth redirect URI:**
+`https://h-forge.firebaseapp.com/__/auth/handler`
+
+**Important mismatch:** Firebase Facebook provider has been enabled with a populated App ID and App Secret, but they were configured before creation of the Meta app in this connected account. The provider must be checked to ensure that its App ID matches **1154248590649927**. If it doesn't, securely enter the correct App ID and App Secret via Firebase Console; never commit secret material to GitHub or transmit it in a chat message.
+
+**Pending:** Configure/verify Valid OAuth Redirect URIs in Meta, category and icon, privacy and deletion URLs; meet Meta app review/Live requirements; match Firebase provider credentials to this Meta app, test OAuth; then set `window.HFORGE_FACEBOOK_READY=true` in `firebase-config.js` and refresh cache.
+
+**Never attach billing or upgrade Firebase from Spark.** Existing accounts and PRs remain untouched.
+
+---
+
 # H-FORGE Facebook Login Setup (no paid services)
 
 **Current status: NOT ACTIVE.** As of November 26, 2026, the Firebase project `h-forge` uses the **Spark / no-billing** plan and has Email/Password and Google providers enabled. Facebook is **not configured** in Firebase, so H-FORGE intentionally shows a disabled "Facebook sign-in · setup pending" button. App-side popup sign-in and account linking code is ready.
