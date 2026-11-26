@@ -156,6 +156,17 @@ input::placeholder,textarea::placeholder{color:#737780}
 .cloud-account{font-weight:850;color:#f8f8fb;overflow-wrap:anywhere}
 .cloud-warning{padding:12px;margin-top:12px;border:1px solid #784547;background:#321c22;border-radius:12px}
 .cloud-warning strong{color:#ffd0d0}
+/* Google sign-in stays inside the same single-column account card on iPhone. */
+.cloud-auth-divider{display:flex;align-items:center;gap:12px;margin:17px 0 12px;color:#979aa4;font-weight:800;font-size:10px;letter-spacing:.14em}
+.cloud-auth-divider:before,.cloud-auth-divider:after{content:"";height:1px;flex:1;background:#42444b}
+.google-signin-btn,.google-link-btn{display:flex;align-items:center;justify-content:center;gap:12px;min-height:49px;width:100%;max-width:100%;padding:11px 14px;border:1px solid #6a6c73;background:#f7f8fa;border-radius:12px;color:#202124;font-size:14px;font-weight:850;text-align:center;cursor:pointer;touch-action:manipulation}
+.google-signin-btn:disabled,.google-link-btn:disabled{opacity:.5;cursor:wait}
+.google-signin-btn:focus-visible,.google-link-btn:focus-visible{outline:3px solid #f24950;outline-offset:3px}
+.google-g{display:inline-grid;place-items:center;width:24px;height:24px;flex:none;font-family:Arial,sans-serif;font-weight:900;font-size:22px;background:conic-gradient(#4285f4 0 25%,#34a853 25% 48%,#fbbc05 48% 70%,#ea4335 70% 87%,#4285f4 87%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cloud-google-link{margin-top:14px;padding:12px;background:#181a1d;border:1px solid #42444c;border-radius:12px}
+.cloud-google-link .note{margin:9px 0 0}
+.cloud-google-link .google-link-btn{min-height:44px}
+#authGate .google-signin-btn{width:100%;min-width:0}
 #cloudStatus,#cloudSyncStatus,#cloudError{line-height:1.55}
 #cloudError:not(:empty){color:#ff8b8e;margin-top:12px}
 
@@ -259,12 +270,23 @@ body.wod-focus-active{overflow:hidden}
         <label><span class="section-title">Password</span><input id="cloudPasswordInput" class="input" type="password" autocomplete="current-password" placeholder="At least 8 characters" aria-label="Account password"></label>
       </div>
       <div class="cloud-actions"><button type="button" class="primary" id="cloudSignIn">Sign in</button><button type="button" class="secondary" id="cloudSignUp">Create account</button><button type="button" class="secondary" id="cloudReset">Reset password</button></div>
-      <p class="note">Signing in keeps guest data separate. You can import existing PRs after signing in.</p>
+      <div class="cloud-auth-divider" aria-hidden="true"><span>OR</span></div>
+      <button type="button" id="cloudGoogleSignIn" class="google-signin-btn" aria-label="Continue with Google">
+        <span class="google-g" aria-hidden="true">G</span>
+        <span>Continue with Google</span>
+      </button>
+      <p class="note">Already have a H-FORGE email/password account? Sign in with it first, then link Google in Settings to keep your PRs.</p>
     </div>
     <div id="cloudSignedIn" class="hidden">
       <div class="cloud-account" id="cloudEmail"></div>
       <p class="note" id="cloudSyncStatus" role="status">Connecting…</p>
       <div class="cloud-actions"><button type="button" class="primary" id="cloudSyncNow">Sync now</button><button type="button" class="secondary" id="cloudImportDevice">Import device PRs</button><button type="button" class="secondary" id="cloudSignOut">Sign out</button></div>
+      <div id="cloudGoogleLinkSection" class="cloud-google-link">
+        <button type="button" id="cloudLinkGoogle" class="google-link-btn">
+          <span class="google-g" aria-hidden="true">G</span> Link Google account
+        </button>
+        <p id="cloudGoogleLinkStatus" class="note" role="status">Link Google to this account to keep your existing PRs when signing in with Google.</p>
+      </div>
       <p class="note">Your guest records are kept separately. A copy of signed-in records also stays on this device for offline use.</p>
     </div>
     <div id="cloudConflict" class="cloud-warning hidden">
@@ -839,7 +861,7 @@ initMovementSelects();renderApp();showView("barbell");
 </script>
 <script src="./firebase-config.js?v=14"></script>
 <script src="./wod-timer.js?v=19"></script>
-<script src="./cloud.js?v=16"></script>
+<script src="./cloud.js?v=20"></script>
 <script>
 // Keep the page at 100% size in the installed iPhone app and Safari.
 // CSS permits normal one-finger panning; these handlers cover legacy WebKit pinch gestures.

@@ -17,6 +17,52 @@
   function syncStatus(text){$("cloudSyncStatus").textContent=text}
   function error(text){$("cloudError").textContent=text||""}
   function show(id,value){$(id).classList.toggle("hidden",!value)}
+  // Use a direct-click OAuth popup: GitHub Pages cannot proxy Firebase redirect
+  // helpers needed by third-party-cookie-restricted Safari browsers.
+  function googleProvider(){
+    const provider=new A.GoogleAuthProvider();
+    provider.setCustomParameters?.({prompt:"select_account"});
+    return provider
+  }
+  function updateGoogleLink(user){
+    const linked=!!(user?.providerData||[]).some(p=>p.providerId==="google.com");
+    show("cloudGoogleLinkSection",!!user);
+    show("cloudLinkGoogle",!!user&&!linked);
+    $("cloudGoogleLinkStatus").textContent=linked
+      ?"Google connected. You can sign in with Google and keep your existing PRs."
+      :"Link Google to this existing account to sign in with Google without creating a separate PR profile."
+  }
+  function googleBusy(value){
+    $("cloudGoogleSignIn").disabled=value;
+    $("cloudLinkGoogle").disabled=value
+  }
+  async function googleAction(kind){
+    if(!auth||working)return;
+    const linking=kind==="link",prior=auth.currentUser,uid=prior?.uid;
+    if(linking&&(!prior||!currentUser||currentUser.uid!==uid)){
+      error("Sign in to your existing H-FORGE account before linking Google.");return
+    }
+    if(!linking&&prior){error("Already signed in. Use Link Google in Settings.");return}
+    if(linking&&(prior.providerData||[]).some(p=>p.providerId==="google.com")){
+      updateGoogleLink(prior);return
+    }
+    error("");working=true;googleBusy(true);
+    try{
+      if(linking){
+        // Never sign into Google as another profile when linking: keep Firebase UID.
+        const result=await A.linkWithPopup(prior,googleProvider());
+        if(result.user.uid!==uid)throw new Error("Account UID changed during linking");
+        updateGoogleLink(result.user);
+        status("Google linked to your current H-FORGE account. Your PRs are unchanged.")
+      }else{
+        // Firebase onAuthStateChanged loads the UID's original local and cloud data.
+        // Don't merge users by matching email addresses.
+        await A.signInWithPopup(auth,googleProvider())
+      }
+    }catch(e){error(handleError(e))}
+    finally{working=false;googleBusy(false)}
+  }
+
   // Reuse the same account form on the welcome gate and inside Settings.
   // The tools stay inert and hidden until Firebase confirms a signed-in user.
   function lockApp(){
@@ -47,6 +93,16 @@
       "auth/email-already-in-use":"An account with this email already exists.",
       "auth/weak-password":"Choose a stronger password.",
       "auth/too-many-requests":"Too many attempts. Please try again later.",
+      "auth/popup-blocked":"Your browser blocked Google sign-in. Open H-FORGE in Safari or allow pop-ups and try again.",
+      "auth/popup-closed-by-user":"Google sign-in was cancelled. No records were changed.",
+      "auth/cancelled-popup-request":"Another Google sign-in request replaced this one. Please try again.",
+      "auth/unauthorized-domain":"Google sign-in is not authorized on this website. Contact the H-FORGE owner.",
+      "auth/operation-not-allowed":"Google sign-in is unavailable. Try email/password.",
+      "auth/operation-not-supported-in-this-environment":"Google sign-in is unsupported here. Open H-FORGE in Safari.",
+      "auth/account-exists-with-different-credential":"An H-FORGE account already uses this email. Sign in with email/password first, then Link Google account in Settings to keep your PRs.",
+      "auth/credential-already-in-use":"This Google identity is linked to another account. Your PRs have not changed.",
+      "auth/provider-already-linked":"Google is already linked.",
+      "auth/requires-recent-login":"For security, sign in again with email/password before linking Google.",
       "permission-denied":"Cloud access was denied. Check the Firestore security rules.",
       "resource-exhausted":"The free cloud quota was reached. Your changes remain on this device.",
       "unavailable":"Cloud is unavailable right now. Your changes remain on this device."
@@ -166,6 +222,7 @@
       lockApp();
       app.switchProfile(null);
       show("cloudAuthForm",true);show("cloudSignedIn",false);
+      updateGoogleLink(null);
       status("Sign in or create a free account to access H-FORGE. Your existing device PRs are preserved.");
       return
     }
@@ -173,6 +230,7 @@
     const hasLocal=app.hasAccountCache(uid);
     app.switchProfile(uid);
     show("cloudAuthForm",false);show("cloudSignedIn",true);
+    updateGoogleLink(user);
     unlockApp();
     $("cloudEmail").textContent=user.email||"Signed-in account";
     status("Signed in. Your account has a separate local profile.");
@@ -236,6 +294,8 @@
       $("cloudSignUp").onclick=()=>authAction("signup");
       $("cloudSignIn").onclick=()=>authAction("signin");
       $("cloudReset").onclick=()=>authAction("reset");
+      $("cloudGoogleSignIn").onclick=()=>googleAction("signin");
+      $("cloudLinkGoogle").onclick=()=>googleAction("link");
       $("cloudSyncNow").onclick=()=>syncNow();
       $("cloudUseCloud").onclick=acceptCloud;
       $("cloudKeepDevice").onclick=keepDevice;
