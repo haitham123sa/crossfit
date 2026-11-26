@@ -98,6 +98,12 @@ function primeWebAudio(){
           if(audio===ctx)audioNoticeText("iPhone blocked Web Audio. Tap Try alternate audio.")
         });
         audioResumePromise=pending;
+        // Some iPhone Home Screen versions leave resume() pending indefinitely.
+        setTimeout(()=>{
+          if(audio===ctx&&audioResumePromise===pending&&ctx.state!=="running"){
+            audioNoticeText("iPhone audio did not resume. Tap Try alternate audio.");
+          }
+        },1800);
         pending.finally(()=>{if(audioResumePromise===pending)audioResumePromise=null})
       }
     }
