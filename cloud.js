@@ -20,7 +20,9 @@
   // Reuse the same account form on the welcome gate and inside Settings.
   // The tools stay inert and hidden until Firebase confirms a signed-in user.
   function lockApp(){
-    $("authGate").appendChild($("cloudCard"));
+    // Keep the form INSIDE the stacked mobile column; never append to #authGate
+    // itself (a flex container), which created a two-column iPhone layout.
+    $("authGateFormSlot").appendChild($("cloudCard"));
     document.body.classList.add("auth-locked");
     document.body.classList.remove("auth-unlocked");
     $("appShell").inert=true;
