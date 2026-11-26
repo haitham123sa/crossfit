@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function owns(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function validProfile() {
+      let p = request.resource.data;
+      return p.keys().hasOnly(['schemaVersion', 'revision', 'updatedAt', 'data'])
+        && p.keys().hasAll(['schemaVersion', 'revision', 'updatedAt', 'data'])
+        && p.schemaVersion == 1
+        && p.revision is int && p.revision > 0
+        && p.updatedAt is timestamp
+        && p.data is map
+        && p.data.keys().hasOnly(['preferredUnit', 'inventory', 'prs'])
+        && p.data.keys().hasAll(['preferredUnit', 'inventory', 'prs'])
+        && p.data.preferredUnit in ['kg', 'lb']
+        && p.data.inventory is map
+        && p.data.inventory.keys().hasOnly(['kg', 'lb'])
+        && p.data.inventory.keys().hasAll(['kg', 'lb'])
+        && p.data.inventory.kg is map
+        && p.data.inventory.lb is map
+        && p.data.prs is list && p.data.prs.size() <= 500;
+    }
+    match /profiles/{uid} {
+      allow get: if owns(uid);
+      allow list: if false;
+      allow create: if owns(uid) && validProfile()
+        && request.resource.data.revision == 1;
+      allow update: if owns(uid) && validProfile()
+        && request.resource.data.revision == resource.data.revision + 1;
+      allow delete: if owns(uid);
+    }
+    match /{otherDocument=**} {
+      allow read, write: if false;
+    }
+  }
+}
