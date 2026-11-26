@@ -135,6 +135,13 @@ input::placeholder,textarea::placeholder{color:#737780}
 .backup-box{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .backup-box .secondary{display:flex;justify-content:center;align-items:center;text-align:center}
 .screen-intro + .card{margin-top:12px}
+.settingUnit{flex:1;max-width:220px;font-size:16px}
+#buildBars .choice,#reverseBars .choice{flex:1;min-width:92px}
+#undoBuild,#resetBuild{flex:1}
+#calculateReverse{margin-top:2px}
+#prHistory{max-height:none}
+.navbtn:focus-visible{outline-offset:-3px}
+
 @media(max-width:460px){.pr-inline-form .grid2{grid-template-columns:1fr}.pr-actions{justify-content:flex-start}.barStage{height:191px}.card{padding:14px}.container{padding-left:13px;padding-right:13px}h1{font-size:21px}.unit-chip{font-size:10px;padding:7px}.pr-stats .pr-stat{padding:6px 4px}}
 @media(min-width:650px){.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#prList{grid-template-columns:repeat(2,minmax(0,1fr))}.percent-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.barStage{height:250px}.plate.large{height:138px}.plate.red{width:35px}.plate.blue{width:33px}.plate.yellow{width:30px}.plate.green{width:28px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
@@ -298,8 +305,9 @@ function showView(name){
   if(name==="prs")renderPRs();
   if(name==="percent")renderPercentage();
   if(name==="settings")renderSettings();
+  window.scrollTo?.({top:0,behavior:"instant"});
 }
-document.addEventListener("click",e=>{if(e.target.closest("[data-go]"))showView(e.target.closest("[data-go]").dataset.go);if(e.target.matches(".navbtn"))showView(e.target.dataset.view)});
+document.addEventListener("click",e=>{const nav=e.target.closest(".navbtn");if(nav)showView(nav.dataset.view)});
 
 /* calculator */
 let buildBar=null,buildLoaded=[],buildHistory=[],buildTarget=null;
@@ -379,6 +387,13 @@ function renderInlinePREditor(place,id){
   </div>`
 }
 function renderPRs(){
+  const validRecords=state.prs.filter(x=>Number.isFinite(Number(x.weight))&&Number(x.weight)>0&&["kg","lb"].includes(x.unit));
+  $("statEntries").textContent=String(validRecords.length);
+  if(validRecords.length){
+    $("statHeaviest").textContent=fmt(Math.max(...validRecords.map(x=>convert(x.weight,x.unit,state.preferredUnit))))+" "+state.preferredUnit.toUpperCase();
+    const dates=validRecords.filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x.date||""))).sort((a,b)=>b.date.localeCompare(a.date));
+    $("statLastPR").textContent=dates.length?new Date(dates[0].date+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"}):"—";
+  }else{$("statHeaviest").textContent="—";$("statLastPR").textContent="—"}
   $("prList").innerHTML=movements.map(m=>{
     const best=bestPR(m);
     if(!best)return `<div class="pr-card"><div><div class="pr-name">${escapeHtml(m)}</div><div class="pr-meta">No PR yet</div></div><button class="secondary newPR" data-movement="${escapeHtml(m)}">Add PR</button>${renderInlinePREditor("list",m)}</div>`;
@@ -498,7 +513,11 @@ document.addEventListener("click",e=>{if(e.target.closest(".pctCard")){const w=N
 /* settings */
 function renderSettings(){
   document.querySelectorAll(".settingUnit").forEach(b=>{const active=b.dataset.unit===state.preferredUnit;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active))});
-  $("globalInventoryGrid").innerHTML=plateData[state.preferredUnit].plates.map(p=>`<label class="inv-row"><span>${fmt(p.weight)} ${state.preferredUnit}</span><input class="globalInvInput" data-v="${p.weight}" type="number" min="0" step="1" value="${state.inventory[state.preferredUnit][p.weight]??0}"></label>`).join("")
+  const colors={red:"#f0444b",blue:"#3487e4",yellow:"#f0cd51",green:"#55be71",black:"#9d9fa8"};
+  $("globalInventoryGrid").innerHTML=plateData[state.preferredUnit].plates.map(p=>`<div class="inv-row">
+    <div class="inv-identity"><span class="inv-color" style="--plate-color:${colors[p.color]}" aria-hidden="true"></span><span>${fmt(p.weight)} ${state.preferredUnit.toUpperCase()}</span></div>
+    <div class="inv-controls"><button type="button" class="inv-adjust" data-v="${p.weight}" data-delta="-1" aria-label="Remove one pair of ${fmt(p.weight)} ${state.preferredUnit} plates">−</button><input class="globalInvInput" data-v="${p.weight}" type="number" min="0" step="1" inputmode="numeric" aria-label="Available pairs of ${fmt(p.weight)} ${state.preferredUnit} plates" value="${state.inventory[state.preferredUnit][p.weight]??0}"><button type="button" class="inv-adjust" data-v="${p.weight}" data-delta="1" aria-label="Add one pair of ${fmt(p.weight)} ${state.preferredUnit} plates">+</button></div>
+  </div>`).join("")
 }
 function renderAppUnitLabels(){
   const unit=state.preferredUnit;$("appUnitLabel").textContent=unit.toUpperCase();
@@ -516,7 +535,20 @@ function setAppUnit(newUnit){
   state.preferredUnit=newUnit;saveState();buildBar=reverseBar=null;buildLoaded=[];buildHistory=[];renderApp(false)
 }
 document.addEventListener("click",e=>{if(e.target.matches(".settingUnit"))setAppUnit(e.target.dataset.unit)});
-document.addEventListener("change",e=>{if(e.target.matches(".globalInvInput")){state.inventory[state.preferredUnit][e.target.dataset.v]=Math.max(0,Math.floor(Number(e.target.value)||0));saveState();renderSettings();const allowed=state.inventory[state.preferredUnit],seen={};buildLoaded=buildLoaded.filter(w=>{seen[w]=(seen[w]||0)+1;return seen[w]<=Math.max(0,allowed[w]||0)});buildHistory=[];renderBuild();clearReverseResult()}});
+function updateInventory(weight,quantity){
+  const plate=meta(state.preferredUnit,weight);if(!plate)return;
+  state.inventory[state.preferredUnit][plate.weight]=Math.max(0,Math.floor(Number(quantity)||0));
+  saveState();renderSettings();
+  const seen={},allowed=state.inventory[state.preferredUnit];
+  buildLoaded=buildLoaded.filter(w=>{seen[w]=(seen[w]||0)+1;return seen[w]<=Math.max(0,allowed[w]||0)});
+  buildHistory=[];renderBuild();clearReverseResult()
+}
+document.addEventListener("change",e=>{if(e.target.matches(".globalInvInput"))updateInventory(e.target.dataset.v,e.target.value)});
+document.addEventListener("click",e=>{
+  const button=e.target.closest(".inv-adjust");if(!button)return;
+  const weight=Number(button.dataset.v),delta=Number(button.dataset.delta);
+  updateInventory(weight,(Number(state.inventory[state.preferredUnit][weight])||0)+delta)
+});
 $("prefNone").onclick=()=>{plateData[state.preferredUnit].plates.forEach(p=>state.inventory[state.preferredUnit][p.weight]=0);saveState();buildLoaded=[];buildHistory=[];renderSettings();renderBuild();clearReverseResult()};
 $("prefAll").onclick=()=>{plateData[state.preferredUnit].plates.forEach(p=>state.inventory[state.preferredUnit][p.weight]=10);saveState();renderSettings();renderBuild();clearReverseResult()};
 
