@@ -8,6 +8,7 @@
   const app=window.HForgeApp, $=id=>document.getElementById(id);
   const config=window.HFORGE_FIREBASE_CONFIG;
   const configured=!!(config&&config.apiKey&&config.authDomain&&config.projectId&&config.appId);
+  const FACEBOOK_READY=window.HFORGE_FACEBOOK_READY===true;
   let auth=null,db=null,A=null,F=null,currentUser=null,ready=false,working=false;
   let baseline=0,remote=null,changeToken=0,syncTimer=null,session=0,conflict=false;
   const key=uid=>"hforgeSyncV1:"+uid;
@@ -61,6 +62,76 @@
       }
     }catch(e){error(handleError(e))}
     finally{working=false;googleBusy(false)}
+  }
+
+  function facebookProvider(){
+    // Only basic Facebook Login credentials. Never request profile extras.
+    return new A.FacebookAuthProvider()
+  }
+  function updateFacebookUI(user){
+    const linked=!!(user?.providerData||[]).some(p=>p.providerId==="facebook.com");
+    const signin=$("cloudFacebookSignIn");
+    signin.disabled=!FACEBOOK_READY||working;
+    signin.setAttribute("aria-label",FACEBOOK_READY?"Continue with Facebook":"Facebook sign-in setup pending");
+    $("cloudFacebookSignInText").textContent=FACEBOOK_READY
+      ?"Continue with Facebook":"Facebook sign-in · setup pending";
+    $("cloudFacebookAvailability").textContent=FACEBOOK_READY
+      ?"Facebook login is available. Existing users should link it from Settings to keep their PRs."
+      :"Facebook login is awaiting Meta developer setup; Google and email sign-in still work.";
+    show("cloudFacebookLinkSection",FACEBOOK_READY&&!!user);
+    show("cloudLinkFacebook",FACEBOOK_READY&&!!user&&!linked);
+    $("cloudLinkFacebook").disabled=!FACEBOOK_READY||working;
+    $("cloudFacebookLinkStatus").textContent=linked
+      ?"Facebook connected. You can sign in with Facebook and keep your PRs."
+      :"Link Facebook to this existing account without creating a separate PR profile.";
+  }
+  async function facebookAction(kind){
+    // Fail closed until Meta App ID/Secret, OAuth settings and Firebase provider
+    // have all been configured and the owner explicitly enables this flag.
+    if(!FACEBOOK_READY){
+      error("Facebook sign-in is not ready yet. Please use Google or email/password.");
+      return
+    }
+    if(!auth||working)return;
+    const linking=kind==="link",prior=auth.currentUser,uid=prior?.uid;
+    if(linking&&(!prior||!currentUser||currentUser.uid!==uid)){
+      error("Sign in to your existing H-FORGE account before linking Facebook.");return
+    }
+    if(!linking&&prior){error("Already signed in. Use Link Facebook in Settings.");return}
+    if(linking&&(prior.providerData||[]).some(p=>p.providerId==="facebook.com")){
+      updateFacebookUI(prior);return
+    }
+    error("");working=true;
+    $("cloudFacebookSignIn").disabled=true;
+    $("cloudLinkFacebook").disabled=true;
+    try{
+      if(linking){
+        // linkWithPopup retains the original UID; never auto-merge by email.
+        const result=await A.linkWithPopup(prior,facebookProvider());
+        if(result.user.uid!==uid)throw Error("Account UID unexpectedly changed during Facebook linking");
+        updateFacebookUI(result.user);
+        status("Facebook linked to your existing H-FORGE account. Your PRs are unchanged.")
+      }else{
+        // onAuthStateChanged opens the user profile matching the Firebase UID.
+        await A.signInWithPopup(auth,facebookProvider())
+      }
+    }catch(e){
+      const codes={
+        "auth/account-exists-with-different-credential":"An H-FORGE account already uses this email. Sign in with your existing Google or email method, then Link Facebook in Settings. Your PRs remain separate until linked.",
+        "auth/credential-already-in-use":"This Facebook account belongs to another H-FORGE account. No records were merged or changed.",
+        "auth/provider-already-linked":"Facebook is already linked to this account.",
+        "auth/operation-not-allowed":"Facebook sign-in has not been enabled in Firebase yet. Use Google or email/password.",
+        "auth/popup-blocked":"Your browser blocked Facebook sign-in. Try Safari and allow the pop-up.",
+        "auth/popup-closed-by-user":"Facebook sign-in was cancelled; no PR data was changed.",
+        "auth/unauthorized-domain":"This website is not authorized for Facebook sign-in.",
+        "auth/operation-not-supported-in-this-environment":"This browser cannot open Facebook sign-in. Try Safari.",
+        "auth/requires-recent-login":"Sign in again with your existing method before linking Facebook."
+      };
+      error(codes[e?.code]||handleError(e))
+    }finally{
+      working=false;
+      updateFacebookUI(auth.currentUser)
+    }
   }
 
   // Reuse the same account form on the welcome gate and inside Settings.
@@ -223,6 +294,7 @@
       app.switchProfile(null);
       show("cloudAuthForm",true);show("cloudSignedIn",false);
       updateGoogleLink(null);
+      updateFacebookUI(null);
       status("Sign in or create a free account to access H-FORGE. Your existing device PRs are preserved.");
       return
     }
@@ -231,6 +303,7 @@
     app.switchProfile(uid);
     show("cloudAuthForm",false);show("cloudSignedIn",true);
     updateGoogleLink(user);
+    updateFacebookUI(user);
     unlockApp();
     $("cloudEmail").textContent=user.email||"Signed-in account";
     status("Signed in. Your account has a separate local profile.");
@@ -296,6 +369,8 @@
       $("cloudReset").onclick=()=>authAction("reset");
       $("cloudGoogleSignIn").onclick=()=>googleAction("signin");
       $("cloudLinkGoogle").onclick=()=>googleAction("link");
+      $("cloudFacebookSignIn").onclick=()=>facebookAction("signin");
+      $("cloudLinkFacebook").onclick=()=>facebookAction("link");
       $("cloudSyncNow").onclick=()=>syncNow();
       $("cloudUseCloud").onclick=acceptCloud;
       $("cloudKeepDevice").onclick=keepDevice;
