@@ -67,7 +67,17 @@ function elapsed(){
 }
 
 let audioMode=loadAudioMode(),mediaClips=Object.create(null),mediaUrls=Object.create(null);
-let audioResumePromise=null,audioNotice="Tap Test sound before your workout. If silent, try alternate audio.";
+// Original Olympic-weightlifting-style competition buzzer, not a recorded IWF sound.
+// Both iOS playback paths use the same frequency/duration patterns.
+const BUZZ_PATTERNS={
+  tick:[[475,0,.10]],
+  go:[[475,0,.28],[475,.36,.28]],
+  rest:[[410,0,.36]],
+  warning:[[475,0,.32],[475,.42,.32]],
+  done:[[475,0,1.08]]
+};
+let warned90=false,warned30=false;
+let audioResumePromise=null,audioNotice="Tap Test sound for the weightlifting-style clock buzzer. If silent, try alternate audio.";
 function loadAudioMode(){
   try{return localStorage.getItem("hforgeTimerAudioModeV1")==="media"?"media":"web"}catch{return"web"}
 }
@@ -120,14 +130,22 @@ function retireWebAudio(){
     try{Promise.resolve(previous.close?.()).catch(()=>{})}catch{}
   }
 }
-function playTone(ctx,freq,duration,delay=0){
-  const at=ctx.currentTime+delay,osc=ctx.createOscillator(),gain=ctx.createGain();
-  osc.type="triangle";osc.frequency.value=freq;
-  gain.gain.setValueAtTime(.0001,at);
-  gain.gain.exponentialRampToValueAtTime(.22,at+.018);
-  gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
-  osc.connect(gain);gain.connect(ctx.destination);
-  osc.start(at);osc.stop(at+duration+.025)
+function playCompetitionBuzzer(ctx,freq,duration,delay=0){
+  const at=ctx.currentTime+delay;
+  const horn=ctx.createOscillator(),harmonic=ctx.createOscillator();
+  const body=ctx.createGain(),harmonicLevel=ctx.createGain();
+  // A rasping electronic horn, not the previous musical triangle-wave chime.
+  horn.type="sawtooth";harmonic.type="triangle";
+  horn.frequency.value=freq;harmonic.frequency.value=freq*1.5;
+  harmonicLevel.gain.setValueAtTime(.30,at);
+  body.gain.setValueAtTime(.0001,at);
+  body.gain.exponentialRampToValueAtTime(.21,at+.015);
+  body.gain.setValueAtTime(.21,at+Math.max(.025,duration-.045));
+  body.gain.exponentialRampToValueAtTime(.0001,at+duration);
+  horn.connect(body);harmonic.connect(harmonicLevel);harmonicLevel.connect(body);
+  body.connect(ctx.destination);
+  horn.start(at);harmonic.start(at);
+  horn.stop(at+duration+.018);harmonic.stop(at+duration+.018)
 }
 function webCue(kind){
   const ctx=primeWebAudio();
@@ -135,26 +153,19 @@ function webCue(kind){
   const emit=()=>{
     if(muted||document.hidden||audioMode!=="web"||audio!==ctx||ctx.state!=="running")return;
     try{
-      if(kind==="go"){playTone(ctx,930,.24);playTone(ctx,1250,.32,.18)}
-      else if(kind==="done"){playTone(ctx,1000,.18);playTone(ctx,840,.2,.25);playTone(ctx,680,.35,.51)}
-      else if(kind==="rest")playTone(ctx,575,.24);
-      else playTone(ctx,840,.17)
-    }catch(e){audioNoticeText("Audio output failed. Tap Try alternate audio.")}
+      for(const [freq,delay,duration] of BUZZ_PATTERNS[kind]||BUZZ_PATTERNS.tick){
+        playCompetitionBuzzer(ctx,freq,duration,delay)
+      }
+    }catch(e){audioNoticeText("Buzzer output failed. Tap Try alternate audio.")}
   };
   if(ctx.state==="running")emit();
   else if(audioResumePromise)audioResumePromise.then(()=>emit());
-  else audioNoticeText("Audio is not ready. Tap Test sound, then try alternate audio.");
+  else audioNoticeText("Buzzer is not ready. Tap Test sound, then try alternate audio.");
   return true
 }
 function makeWav(kind){
-  // Offline, original beep sounds. WAV is constructed locally (no network/audio files).
-  const sounds={
-    tick:[[830,0,.17]],
-    go:[[920,0,.23],[1250,.19,.29]],
-    rest:[[570,0,.26]],
-    done:[[1000,0,.17],[850,.24,.2],[670,.5,.36]]
-  };
-  const segments=sounds[kind]||sounds.tick;
+  // Same competition-style buzzer generated locally as 16-bit WAV for iPhone fallback.
+  const segments=BUZZ_PATTERNS[kind]||BUZZ_PATTERNS.tick;
   const rate=22050,duration=Math.max(...segments.map(v=>v[1]+v[2]))+.03;
   const sampleCount=Math.ceil(rate*duration),buffer=new ArrayBuffer(44+sampleCount*2),view=new DataView(buffer);
   function write(offset,text){for(let i=0;i<text.length;i++)view.setUint8(offset+i,text.charCodeAt(i))}
@@ -168,8 +179,9 @@ function makeWav(kind){
     for(const [freq,offset,length] of segments){
       const p=time-offset;
       if(p>=0&&p<length){
-        const envelope=Math.min(1,p/.015,(length-p)/.035);
-        sample+=Math.sin(p*2*Math.PI*freq)*Math.max(0,envelope)*.36
+        const envelope=Math.max(0,Math.min(1,p/.015,(length-p)/.045));
+        const cycles=p*freq, saw=2*(cycles-Math.floor(cycles+.5));
+        sample+=(saw*.38+Math.sin(p*2*Math.PI*freq*1.5)*.12)*envelope
       }
     }
     view.setInt16(44+i*2,Math.max(-32767,Math.min(32767,Math.round(sample*32767))),true)
@@ -220,9 +232,9 @@ function testSound(){
     return
   }
   if(audioMode==="web"&&audio&&audio.state!=="running")retireWebAudio();
-  audioNoticeText(audioMode==="media"?"Playing alternate test beep…":"Playing standard test beep…");
+  audioNoticeText(audioMode==="media"?"Playing competition buzzer (alternate audio)…":"Playing competition buzzer…");
   enableAudio();
-  cue("go")
+  cue("warning")
 }
 function toggleAudioMode(){
   audioMode=audioMode==="web"?"media":"web";
@@ -246,6 +258,17 @@ function runTick(){
   }
   if(state==="running"){
     const m=metrics(elapsed(),config);
+    const remaining=m.total===null?null:Math.max(0,m.total-elapsed());
+    // Adapt IWF-style 90s / 30s warnings to finite WOD clocks.
+    // Never play overlapping warning + finish buzzers after a delayed background tick.
+    if(!m.done&&remaining!==null){
+      if(!warned90&&m.total>=120000&&remaining<=90000){
+        warned90=true;cue("warning")
+      }
+      if(!warned30&&m.total>=60000&&remaining<=30000){
+        warned30=true;cue("warning")
+      }
+    }
     if(m.done){
       carried=m.total;state="finished";finishReason=mode==="fortime"?"cap":"complete";
       stopTicker();cue("done")
@@ -328,7 +351,7 @@ function render(){
 }
 function reset(){
   stopTicker();state="idle";pausedFrom=null;carried=0;anchor=0;config=null;
-  rounds=0;reps=0;lastCountdown=null;lastIntervalKey=null;finishReason="";
+  rounds=0;reps=0;lastCountdown=null;lastIntervalKey=null;warned90=warned30=false;finishReason="";
   if(focus){focus=false;document.body.classList.remove("wod-focus-active")}
   setStatus("Timer reset. Set up your next workout.");render()
 }
@@ -341,7 +364,7 @@ function start(){
   let next;
   try{next=readConfig()}catch(e){setStatus(e.message);return false}
   config=next;carried=0;anchor=now();rounds=0;reps=0;pausedFrom=null;
-  lastIntervalKey=null;lastCountdown=null;finishReason="";
+  lastIntervalKey=null;lastCountdown=null;warned90=warned30=false;finishReason="";
   enableAudio();state=config.prep>0?"prep":"running";
   // Prime iPhone audio during the user click, not on the first delayed interval.
   cue(state==="running"?"go":"tick");
