@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<link rel="icon" href="./favicon-32.png?v=4" type="image/png">
+<title>Privacy Policy · H-FORGE</title><meta name="description" content="How H-FORGE handles workout and account data."><style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090a0c;color:#f0f1f4}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse 70% 25% at 50% 0,#431b23,transparent),#090a0c}
+main{max-width:740px;margin:0 auto;padding:36px 22px 80px;line-height:1.7}
+.logo{display:flex;align-items:center;gap:13px;text-decoration:none;color:#f7f7fa;font-weight:950;letter-spacing:.05em;font-size:26px}
+.logo img{width:47px;height:47px;border-radius:10px}.logo span{color:#f14e59}
+.kicker{margin-top:32px;color:#fb6973;font-weight:900;letter-spacing:.16em;font-size:12px}
+h1{font-size:clamp(30px,7vw,46px);line-height:1.1;letter-spacing:-.035em;margin:12px 0 20px}h2{font-size:19px;margin:29px 0 8px;color:#fff}
+p,li{color:#c9ccd4}a{color:#ff7e87;text-underline-offset:3px}
+.card{border:1px solid #3e4149;border-radius:15px;background:#1a1b20;padding:18px;margin-top:20px}
+small{color:#adb1bc}.footer{border-top:1px solid #33353a;margin-top:40px;padding-top:21px;color:#b9b9c0;font-size:12px}
+</style></head>
+<body><main>
+<a class="logo" href="./"><img src="./assets/icon-192.png?v=4" alt=""> H-<span>FORGE</span></a>
+<div class="kicker">PRIVACY & DATA</div><h1>Privacy Policy</h1>
+<p><small>Effective: November 27, 2026</small></p>
+<p>H-FORGE is a browser-based strength-training utility hosted at <a href="https://haitham123sa.github.io/crossfit/">haitham123sa.github.io/crossfit</a>. It provides barbell calculations, workout timers, personal-record tracking, and optional backup and synchronization to your signed-in account.</p>
+
+<h2>Data used by H-FORGE</h2>
+<p>Account login uses Firebase Authentication. Depending on your chosen sign-in method, Firebase and the identity provider (such as Google or Facebook) process identity information, which may include an email address, user identifier and provider profile information. If you use an email/password account, the password is handled by Firebase Authentication rather than stored in the H-FORGE app's PR records.</p>
+<p>H-FORGE stores information you enter, including lift names, PR weights and units, dates, optional notes, your preferred KG/LB unit, and your plate inventories. A signed-in account's training data is stored in a private Cloud Firestore profile associated with its Firebase user ID and cached locally in the browser. Device-only guest records and any JSON backups you choose to export remain on the device or wherever you save them.</p>
+
+<h2>Why this information is used</h2>
+<p>Account information supports sign-in and access to the correct user profile. Workout and equipment data supports PR calculations, history, training preferences and optional cross-device synchronization. H-FORGE's timer runs locally on your device and does not upload a timer event log.</p>
+
+<h2>Service providers and data sharing</h2>
+<p>Google Firebase provides Authentication and Cloud Firestore. GitHub Pages serves the website's static files. Google and Meta/Facebook may process information when you select their sign-in methods under their own policies. The app does not require payment details. H-FORGE does not intentionally sell workout history or account data to advertisers. Firebase and these providers may process limited technical information needed to deliver and secure their services.</p>
+
+<h2>Storage, security and retention</h2>
+<p>Firestore access rules restrict each signed-in user to their own stored profile. Records are retained while your account and its associated profile remain active, subject to service and technical limitations. The website may cache its code for offline access. Authentication state and PR information can remain in local browser storage on each device used to access the app. You should avoid signing in on untrusted shared devices.</p>
+
+<h2>Your controls and deletion</h2>
+<p>You can export a JSON backup in H-FORGE's Settings. To permanently remove your H-FORGE authentication account and its cloud PR profile, sign in, open <strong>Settings → Account & Cloud Sync</strong>, and select <strong>Delete account & cloud PRs</strong>. The app asks you to confirm. Firebase may require you to sign in again before completing account deletion. For details, visit <a href="./delete-data.html">Data deletion instructions</a>.</p>
+<p>Deleting your account does not remotely delete downloaded JSON backups or local caches on other devices. Clear H-FORGE website storage on those devices separately after saving anything you want to retain. Device guest data is separate from authenticated user profiles and is not deleted by deleting a signed-in account.</p>
+
+<h2>Children, changes and further questions</h2>
+<p>H-FORGE is intended for athletes who are old enough to create accounts with their chosen identity provider. This policy may change as H-FORGE features change; the current version will be published at this URL. For a general question about the project, see its <a href="https://github.com/haitham123sa/crossfit">public GitHub repository</a>. Do not post passwords, account IDs or personal training records in public repository discussions.</p>
+
+<div class="footer"><a href="./">Return to H-FORGE</a> · <a href="./delete-data.html">Data deletion</a></div>
+</main></body></html>
