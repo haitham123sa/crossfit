@@ -350,6 +350,43 @@
     markDirty();
     syncStatus(added+" guest PR entries copied. Sync pending; originals still on the device.")
   }
+  async function deleteMyAccount(){
+    const user=auth?.currentUser,uid=user?.uid;
+    if(!uid||!currentUser||currentUser.uid!==uid||working)return;
+    if(!window.confirm("Permanently delete this H-FORGE account and its cloud PR records? Export a backup first. This cannot be undone."))return;
+    if(window.prompt("Type DELETE to confirm permanent removal of your account and cloud records:")!=="DELETE")return;
+    working=true;
+    clearTimeout(syncTimer);
+    ready=false;conflict=true;error("");
+    $("cloudDeleteAccount").disabled=true;
+    syncStatus("Deleting your account and cloud records…");
+    let cloudDeleted=false;
+    try{
+      // The owner-only Firestore rules permit deletion of this profile only.
+      await F.deleteDoc(remoteRef(uid));
+      cloudDeleted=true;
+      // Auth may require recent login; if so, keep the local cache so PRs are not lost.
+      await A.deleteUser(user);
+      localStorage.removeItem("hforgeUserDataV1:"+uid);
+      localStorage.removeItem(key(uid));
+      // Other devices have separate caches. Device-guest data is intentionally kept.
+      status("Account and cloud PR records deleted.");
+    }catch(e){
+      if(cloudDeleted){
+        syncStatus("Cloud PRs were deleted, but the account still needs removal.");
+        error("Your cloud profile is deleted but Firebase couldn't remove the account. Sign out and sign in again, then retry Delete account. Local PRs on this device have been retained for safety. Do not use Sync now until removal is complete.");
+      }else{
+        syncStatus("Deletion stopped; your existing data remains on this device.");
+        error("Unable to delete the cloud profile. Account was not deleted. "+handleError(e));
+      }
+    }finally{
+      working=false;
+      $("cloudDeleteAccount").disabled=false;
+      // Keep syncing disabled after a partial delete to prevent reupload of data
+      // the user explicitly asked to remove. A fresh login resets this state.
+      if(!cloudDeleted&&auth?.currentUser?.uid===uid){ready=true;conflict=false}
+    }
+  }
   async function start(){
     if(!app){status("Sign-in could not start. Reload when connected to the internet.");return}
     if(!configured){
@@ -371,6 +408,7 @@
       $("cloudLinkGoogle").onclick=()=>googleAction("link");
       $("cloudFacebookSignIn").onclick=()=>facebookAction("signin");
       $("cloudLinkFacebook").onclick=()=>facebookAction("link");
+      $("cloudDeleteAccount").onclick=deleteMyAccount;
       $("cloudSyncNow").onclick=()=>syncNow();
       $("cloudUseCloud").onclick=acceptCloud;
       $("cloudKeepDevice").onclick=keepDevice;
