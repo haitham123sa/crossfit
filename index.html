@@ -46,7 +46,7 @@ h2{font-size:clamp(25px,7.2vw,34px);line-height:1.13;margin:0;font-weight:900;le
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .hidden{display:none!important}
-.navbar{max-width:940px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.navbar{max-width:940px;margin:0 auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px}
 #topNav{position:fixed;z-index:100;bottom:0;left:0;right:0;background:#141519ed;border-top:1px solid #34363c;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:9px 10px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 24px #0009}
 .navbtn{min-height:58px;border:0;background:transparent;color:#9a9da5;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;font-size:10px;font-weight:800;letter-spacing:.01em;padding:5px 2px}
 .navbtn svg{height:22px;width:22px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -185,6 +185,50 @@ body.auth-unlocked #authGate{display:none!important}
 .auth-gate-note{text-align:center;margin-top:20px;color:#9c9fa6;font-size:12px;line-height:1.6}
 .auth-backup{display:block;margin:12px auto 0;padding:11px 13px;border:1px solid #42454a;border-radius:11px;color:#e6e8eb;background:#1b1d22;font-weight:750;font-size:12px}
 
+
+/* Offline-first, five-tab WOD timer */
+.wod-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wod-mode-grid button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;min-width:0;padding:12px 14px;font-size:14px;letter-spacing:.045em;text-align:left}
+.wod-mode-grid small{font-size:10px;font-weight:600;opacity:.8;letter-spacing:0}
+.wod-config-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:11px}
+.wod-config-row label,.wod-prep-label{min-width:0;display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:750;color:#c7c9d1}
+.wod-config-row input,.wod-prep-label select{font-variant-numeric:tabular-nums}
+.wod-prep-label{margin-top:15px}
+.wod-headline,.wod-lowerline{display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:12px}
+.wod-headline>span:first-child{color:#ff656a;font-weight:950;letter-spacing:.09em}
+.wod-headline>span:last-child{color:#d5d6dc;font-weight:700}
+.wod-stage-card{padding:16px 13px}
+.wod-progress-ring{width:min(72vw,300px);height:min(72vw,300px);border-radius:50%;margin:22px auto;padding:9px;background:conic-gradient(#f24850 var(--wod-progress,0%),#383a40 0%);box-shadow:0 0 30px #0008,0 0 40px #f03a4810;transition:background .1s linear}
+.wod-progress-core{background:radial-gradient(circle at 50% 30%,#232128,#0e1115 75%);width:100%;height:100%;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:16px;text-align:center;border:1px solid #56565c}
+.wod-phase{font-size:clamp(12px,3.5vw,16px);font-weight:950;letter-spacing:.15em;color:#ff6369}
+.wod-clock{font-size:clamp(39px,13vw,70px);font-weight:950;font-variant-numeric:tabular-nums;letter-spacing:-.065em;white-space:nowrap;line-height:1.1;text-shadow:0 4px 9px #0008}
+.wod-detail{color:#b3b5bd;font-size:clamp(10px,2.7vw,12px);line-height:1.4;min-height:16px;max-width:240px}
+.wod-lowerline{background:#101115;border:1px solid #34363e;border-radius:10px;padding:11px 12px}
+.wod-lowerline>span{color:#9b9da6;font-size:10px;font-weight:850;letter-spacing:.04em}
+.wod-lowerline strong{font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+.wod-counter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.wod-counter{background:#121317;border:1px solid #3c4048;border-radius:13px;padding:11px 9px;text-align:center;min-width:0}
+.wod-counter>span{font-size:11px;font-weight:850;letter-spacing:.11em;color:#afadb6}
+.wod-counter-controls{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
+.wod-counter-controls button{min-width:43px;min-height:45px;border-radius:11px;background:#2b2c33;border:1px solid #5a5b64;color:#fff;font-weight:900;font-size:23px}
+.wod-counter-controls strong{font-size:clamp(25px,7vw,33px);font-weight:950;font-variant-numeric:tabular-nums}
+.wod-main-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.wod-main-controls #wodStart{grid-column:1/-1}
+.wod-main-controls .secondary{min-height:48px}
+.wod-alt-controls{display:flex;gap:9px;margin-top:10px}
+.wod-alt-controls button{flex:1;min-width:0}
+#wodMessage{color:#d0d1d7;margin:12px 0 0}
+.wod-disclaimer{font-size:11px;margin:10px 0 0}
+body.wod-focus-active{overflow:hidden}
+#view-timer.wod-focus{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:stretch;overflow:auto;width:100%;height:100dvh;min-height:100%;padding:calc(22px + env(safe-area-inset-top,0px)) 13px calc(25px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse at 50% 0%,#2c151b,transparent 65%),#090a0c}
+#view-timer.wod-focus .screen-intro,#view-timer.wod-focus .wod-mode-card,#view-timer.wod-focus .wod-setup-card{display:none}
+#view-timer.wod-focus .wod-stage-card{margin-top:auto}
+#view-timer.wod-focus .wod-control-card{margin-bottom:auto}
+#view-timer.wod-focus .wod-progress-ring{width:min(78vw,350px);height:min(78vw,350px)}
+@media(min-width:650px){.wod-mode-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.wod-counter-controls{justify-content:center}.wod-counter-controls button{width:60px}.wod-counter-controls strong{min-width:65px}}
+@media(max-width:375px){.navbtn{font-size:9px;padding:4px 0;min-height:54px}.navbar{gap:1px}.wod-progress-ring{width:min(77vw,270px);height:min(77vw,270px)}.wod-clock{font-size:clamp(38px,12.5vw,58px)}.wod-counter-controls{gap:3px}.wod-counter-controls button{min-width:39px}}
+@media(prefers-reduced-motion:reduce){.wod-progress-ring{transition:none}}
+
 </style>
 </head>
 <body class="auth-locked">
@@ -245,6 +289,9 @@ body.auth-unlocked #authGate{display:none!important}
     <button class="navbtn" data-view="barbell" aria-label="Barbell">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 10v4m3-7v10m3-5h8m3-5v10m3-7v4M8 10v4m8-4v4"/></svg><span>Barbell</span>
     </button>
+    <button class="navbtn" data-view="timer" aria-label="WOD Timer">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6M12 5V2M18.5 6.5 21 4"/></svg><span>Timer</span>
+    </button>
     <button class="navbtn" data-view="prs" aria-label="PRs">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v7a5 5 0 0 1-10 0V4Z"/><path d="M7 6H3v2a4 4 0 0 0 4 4m10-6h4v2a4 4 0 0 1-4 4M12 16v4m-5 0h10"/></svg><span>PRs</span>
     </button>
@@ -280,6 +327,102 @@ body.auth-unlocked #authGate{display:none!important}
     <div class="card"><span class="section-title">Target total weight (<span id="targetUnitLabel">kg</span>)</span><input class="input" id="targetWeight" type="number" min="0" step="0.25" inputmode="decimal" placeholder="e.g. 225"></div>
     <div class="card"><span class="section-title">Choose a barbell</span><div class="row" id="reverseBars"></div></div>
     <div class="card"><button class="primary" id="calculateReverse">Calculate Plates</button><div class="result-list" id="reverseBreakdown"></div></div>
+  </div>
+</section>
+
+<section id="view-timer" class="hidden">
+  <div class="screen-intro">
+    <div class="eyebrow">THE CLOCK IS RUNNING</div>
+    <h2>WOD TIMER.</h2>
+    <p>Choose your workout. Hit Start. Leave nothing on the floor.</p>
+  </div>
+  <div class="card wod-mode-card">
+    <span class="section-title"><span class="section-mark">01</span> Choose timer mode</span>
+    <div class="wod-mode-grid" role="group" aria-label="Workout timer mode">
+      <button type="button" class="choice active" data-wod-mode="amrap" aria-pressed="true">AMRAP<small>As many rounds</small></button>
+      <button type="button" class="choice" data-wod-mode="emom" aria-pressed="false">EMOM<small>Every interval</small></button>
+      <button type="button" class="choice" data-wod-mode="fortime" aria-pressed="false">FOR TIME<small>Beat the clock</small></button>
+      <button type="button" class="choice" data-wod-mode="tabata" aria-pressed="false">TABATA<small>Work / rest</small></button>
+    </div>
+  </div>
+  <div class="card wod-setup-card">
+    <span class="section-title"><span class="section-mark">02</span> Workout setup</span>
+    <div class="wod-config-row" data-wod-config="amrap">
+      <label for="wodAmrapMinutes">Workout duration (minutes)
+        <input id="wodAmrapMinutes" class="input wod-config-input" type="number" inputmode="numeric" min="1" max="240" step="1" value="12">
+      </label>
+    </div>
+    <div class="wod-config-row hidden" data-wod-config="emom">
+      <label for="wodEmomRounds">Intervals
+        <input id="wodEmomRounds" class="input wod-config-input" type="number" inputmode="numeric" min="1" max="120" step="1" value="10">
+      </label>
+      <label for="wodEmomSeconds">Seconds per interval
+        <input id="wodEmomSeconds" class="input wod-config-input" type="number" inputmode="numeric" min="5" max="600" step="1" value="60">
+      </label>
+    </div>
+    <div class="wod-config-row hidden" data-wod-config="fortime">
+      <label for="wodForTimeCap">Time cap in minutes (0 = no cap)
+        <input id="wodForTimeCap" class="input wod-config-input" type="number" inputmode="numeric" min="0" max="240" step="1" value="20">
+      </label>
+    </div>
+    <div class="wod-config-row hidden" data-wod-config="tabata">
+      <label for="wodTabataRounds">Rounds
+        <input id="wodTabataRounds" class="input wod-config-input" type="number" inputmode="numeric" min="1" max="100" step="1" value="8">
+      </label>
+      <label for="wodTabataWork">Work seconds
+        <input id="wodTabataWork" class="input wod-config-input" type="number" inputmode="numeric" min="1" max="600" step="1" value="20">
+      </label>
+      <label for="wodTabataRest">Rest seconds
+        <input id="wodTabataRest" class="input wod-config-input" type="number" inputmode="numeric" min="0" max="600" step="1" value="10">
+      </label>
+    </div>
+    <label class="wod-prep-label" for="wodPrepSeconds">Get-ready countdown
+      <select id="wodPrepSeconds" class="wod-config-input">
+        <option value="0">Off</option>
+        <option value="3">3 seconds</option>
+        <option value="10" selected>10 seconds</option>
+        <option value="20">20 seconds</option>
+        <option value="30">30 seconds</option>
+      </select>
+    </label>
+  </div>
+  <div class="card accent-card wod-stage-card">
+    <div class="wod-headline"><span id="wodModeLabel">AMRAP</span><span id="wodModeSummary">12 min AMRAP</span></div>
+    <div id="wodProgressRing" class="wod-progress-ring" style="--wod-progress:0%">
+      <div class="wod-progress-core">
+        <div id="wodPhase" class="wod-phase">READY</div>
+        <div id="wodClock" class="wod-clock" role="timer" aria-live="off">12:00</div>
+        <div id="wodDetail" class="wod-detail">Choose your mode and hit Start</div>
+      </div>
+    </div>
+    <div class="wod-lowerline"><span>ROUND / SCORE</span><strong id="wodRoundDisplay">0 rounds + 0 reps</strong></div>
+  </div>
+  <div id="wodManualCounters" class="card wod-counter-card">
+    <span class="section-title"><span class="section-mark">03</span> Track your score</span>
+    <div class="wod-counter-grid">
+      <div class="wod-counter">
+        <span>ROUNDS</span>
+        <div class="wod-counter-controls"><button type="button" id="wodRoundMinus" aria-label="Subtract one round" disabled>−</button><strong id="wodRounds">0</strong><button type="button" id="wodRoundPlus" aria-label="Add one round" disabled>+</button></div>
+      </div>
+      <div class="wod-counter">
+        <span>REPS</span>
+        <div class="wod-counter-controls"><button type="button" id="wodRepMinus" aria-label="Subtract one rep" disabled>−</button><strong id="wodReps">0</strong><button type="button" id="wodRepPlus" aria-label="Add one rep" disabled>+</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="card wod-control-card">
+    <div class="wod-main-controls">
+      <button type="button" id="wodStart" class="primary">Start workout</button>
+      <button type="button" id="wodPause" class="secondary" disabled>Pause</button>
+      <button type="button" id="wodFinish" class="secondary hidden" disabled>Finish</button>
+      <button type="button" id="wodReset" class="secondary" disabled>Reset</button>
+    </div>
+    <div class="wod-alt-controls">
+      <button type="button" id="wodFocus" class="secondary">Focus mode</button>
+      <button type="button" id="wodSound" class="secondary" aria-pressed="true">Sound on</button>
+    </div>
+    <p id="wodMessage" class="note" role="status" aria-live="polite">Ready for your workout.</p>
+    <p class="note wod-disclaimer">Timer runs on your device with no cloud requests. Keep H-FORGE active for audible cues; iPhone background/silent mode can suppress sound.</p>
   </div>
 </section>
 
@@ -646,6 +789,7 @@ $("importData").addEventListener("change",async e=>{const f=e.target.files[0];if
 
 /* A separate guest profile avoids merging one person's PRs into another account. */
 function switchHForgeProfile(uid){
+  window.HForgeTimer?.reset();
   storageScope=uid||null;
   state=loadState();
   buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];prEditor=null;
@@ -683,6 +827,7 @@ window.HForgeApp={
 initMovementSelects();renderApp();showView("barbell");
 </script>
 <script src="./firebase-config.js?v=14"></script>
+<script src="./wod-timer.js?v=17"></script>
 <script src="./cloud.js?v=16"></script>
 <script>
 // Keep the page at 100% size in the installed iPhone app and Safari.
