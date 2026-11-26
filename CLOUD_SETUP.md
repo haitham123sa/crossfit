@@ -1,52 +1,41 @@
-# H-FORGE Cloud Sync — zero-billing setup
+# H-FORGE Firebase Cloud Sync
 
-## Current state
-The website includes optional account and cloud-sync code, but cloud is **off by default** until the owner connects a Firebase project. Existing guest PRs and calculations continue working locally.
+## Current project (November 26, 2026)
 
-## 1. Create a Firebase project on Spark
-1. Open https://console.firebase.google.com/ and create a project called **H-FORGE**.
-2. Keep it on **Spark (no-cost)**. **Never link billing, upgrade to Blaze, or enable paid features.**
-3. Add a **Web app** under Project settings and copy its Firebase web configuration.
-4. Keep hosting at https://haitham123sa.github.io/crossfit/ — no domain or new hosting is necessary.
+- Firebase project **H-FORGE** — project ID `h-forge`.
+- **Spark (free) plan**; no billing account linked.
+- Email/Password Authentication **enabled**.
+- Authorized sign-in domain: `haitham123sa.github.io`.
+- Default Cloud Firestore **Standard** database created.
+- Owner-only Firestore rules published on November 26, 2026. See [firestore.rules](./firestore.rules).
+- Public web app settings in [firebase-config.js](./firebase-config.js).
+- Web app hosted on GitHub Pages: https://haitham123sa.github.io/crossfit/
 
-## 2. Enable Authentication
-1. Under Authentication → Sign-in method, enable **Email/Password** (not Phone/SMS).
-2. Under Authentication → Settings → Authorized domains, add `haitham123sa.github.io`.
+## Important zero-cost constraints
 
-## 3. Create Firestore with private rules
-1. Open Firestore Database and create the **default** database (Standard edition) under the free allowance.
-2. Open the Firestore **Rules** tab, paste the contents of `firestore.rules`, and **Publish**.
-3. Never leave Firestore in public/test mode. The included rules allow a user to access only their own `/profiles/<uid>` document.
+Do not add a billing account or upgrade to Blaze. Do not enable SMS/Phone auth, Cloud Functions, or paid APIs. The Spark plan can temporarily block services if usage limits are reached. If that happens, H-FORGE keeps locally saved data and offline calculations working; cloud sync can resume once allowed. Firebase and Google may change free-tier policies; indefinite free cloud service cannot be guaranteed.
 
-## 4. Connect H-FORGE
-Edit `firebase-config.js` in the GitHub repository and replace `null` with the exact Firebase **web app** config:
+## How accounts work
 
-```javascript
-window.HFORGE_FIREBASE_CONFIG = {
-  apiKey: "YOUR_WEB_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT",
-  appId: "YOUR_WEB_APP_ID"
-};
-```
+- **Settings → Account & Cloud Sync**: create an account or sign in using email and password.
+- The original `crossfitToolsDataV1` guest profile is untouched when signing in.
+- Signing in loads a separate account-scoped local profile and the owner's Firestore profile.
+- If this device has guest PRs, use **Import device PRs** to copy them explicitly (no destructive migration).
+- Signed-in changes save on the device immediately and sync when online.
+- If the cloud record changed on another device, H-FORGE asks the user to choose a copy rather than silently overwriting an unsynced one.
+- **Export Backup** remains available. Test restores before depending on cloud sync.
+- A mobile-web account deletion and privacy management flow should be added before promoting the app broadly.
 
-Use only public web configuration values, never a service-account credential or private key. Commit the change and increase the web asset version and service-worker cache version so iPhone Home Screen installations fetch the updated config.
+## Before inviting external users
 
-## 5. Test before inviting users
-- Create an account, record a PR, and check it loads on a second device after sign-in.
-- Verify a second account cannot read or overwrite the first account's data.
-- Test Guest PR import and the Export Backup button.
-- Test offline edits and reconnecting. If another device changed the cloud copy, the app should ask which version to retain instead of silently overwriting it.
-- Test both login and logout, and confirm local guest PRs are still there.
-- Do not promise unlimited free cloud usage. Spark caps some services and access can stop at quota limits; this design should never silently switch to a paid tier.
+1. Test email registration and login on a physical iPhone.
+2. Test PR editing, deletion and sync across two devices.
+3. Check that a different account cannot read another account's Firestore profile.
+4. Test offline entry, reconnect, and conflict resolution.
+5. Write and publish a privacy policy and a self-service account deletion process.
+6. Monitor Firebase free quotas. Keep billing unlinked.
 
-## Current implementation notes
-- One Firestore document per account; writes are delayed and version-checked to reduce free-tier usage and avoid silent overwrites.
-- Each signed-in account gets its own locally cached data namespace. The original `crossfitToolsDataV1` guest data remains unchanged.
-- The app requires owner action in Firebase Console: account creation, domain authorization, Firestore rules publication, and web config.
-- No account/profile data has been migrated or uploaded yet.
-- For a wider public launch, add privacy-policy and account-deletion flows, and review the security rules with live Firebase tests.
-
-Reference: https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
-Reference: https://firebase.google.com/docs/firestore/security/rules-conditions
-Reference: https://firebase.google.com/docs/auth/web/start
+Official docs:
+- https://firebase.google.com/docs/projects/billing/firebase-pricing-plans
+- https://firebase.google.com/docs/auth/web/start
+- https://firebase.google.com/docs/firestore/security/rules-conditions
