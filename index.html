@@ -6,12 +6,12 @@
 <meta name="theme-color" content="#101114">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CrossFit Tools">
+<meta name="apple-mobile-web-app-title" content="H-FORGE">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=4">
 <link rel="icon" type="image/x-icon" href="./favicon.ico?v=4">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=4">
-<link rel="manifest" href="./manifest.webmanifest?v=4">
-<title>CrossFit Tools</title>
+<link rel="manifest" href="./manifest.webmanifest?v=10">
+<title>H-FORGE · Strength & Barbell Tools</title>
 <style>
 
 :root{color-scheme:dark;--bg:#090a0c;--card:#17191d;--card-hi:#202328;--text:#f7f7f8;--muted:#a1a5ae;--line:#343840;--accent:#f34348;--good:#70dba2}
@@ -153,8 +153,8 @@ input::placeholder,textarea::placeholder{color:#737780}
 <header>
   <img class="brand-logo" src="./assets/icon-192.png?v=4" alt="" width="56" height="56" decoding="async">
   <div class="brand-copy">
-    <h1>CrossFit <span>Tools</span></h1>
-    <div class="subtitle">TRAIN SMART · LIFT HEAVY</div>
+    <h1>H-<span>FORGE</span></h1>
+    <div class="subtitle">BUILT FOR THE BAR.</div>
     <div class="unit-display">GLOBAL UNIT · <strong id="appUnitLabel">KG</strong></div>
   </div>
   <div class="unit-chip">STRENGTH</div>
@@ -553,7 +553,7 @@ $("prefNone").onclick=()=>{plateData[state.preferredUnit].plates.forEach(p=>stat
 $("prefAll").onclick=()=>{plateData[state.preferredUnit].plates.forEach(p=>state.inventory[state.preferredUnit][p.weight]=10);saveState();renderSettings();renderBuild();clearReverseResult()};
 
 $("exportData").onclick=()=>{
-  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="crossfit-tools-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500)
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="h-forge-backup.json";a.click();setTimeout(()=>URL.revokeObjectURL(url),500)
 };
 $("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];prEditor=null;["targetWeight","pctBaseWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
 
