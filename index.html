@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f4f4f4">
+<meta name="theme-color" content="#101114">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CrossFit Tools">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=4">
 <link rel="icon" type="image/x-icon" href="./favicon.ico?v=4">
@@ -13,89 +13,165 @@
 <link rel="manifest" href="./manifest.webmanifest?v=4">
 <title>CrossFit Tools</title>
 <style>
-:root{--bg:#f4f4f4;--card:#fff;--text:#171717;--muted:#6b6b6b;--line:#d8d8d8;--accent:#222;--good:#1f7a3d}
+
+:root{color-scheme:dark;--bg:#090a0c;--card:#17191d;--card-hi:#202328;--text:#f7f7f8;--muted:#a1a5ae;--line:#343840;--accent:#f34348;--good:#70dba2}
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text)}
+html{scroll-behavior:smooth}
+body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(ellipse 110% 36% at 85% -8%,#38191e 0%,transparent 59%),linear-gradient(180deg,#111215,#090a0c 36%,#0c0d10);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-button:disabled{cursor:not-allowed}.primary:disabled,.secondary:disabled{opacity:.4}
-.container{max-width:860px;margin:auto;padding:16px 16px 36px}
-header{padding:12px 0 4px;display:flex;gap:12px;align-items:center}
-.brand-logo{display:block;width:52px;height:52px;flex:0 0 auto;object-fit:contain;border-radius:12px}.brand-copy{min-width:0}
-h1{font-size:28px;margin:0}.subtitle{color:var(--muted);font-size:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:14px}
-.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.home-tool{min-height:135px;border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px;text-align:left}
-.home-tool .icon{font-size:30px}.home-tool strong{display:block;font-size:18px;margin-top:12px}.home-tool span{display:block;color:var(--muted);font-size:13px;margin-top:4px}
-.navbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
-.navbtn,.choice,.secondary,.plateButton{border:1px solid var(--line);background:#fff;border-radius:9px;padding:10px 12px;font-weight:700}
-.navbtn.active,.choice.active,.primary{background:#222;color:#fff;border-color:#222}
-.primary{width:100%;border:0;border-radius:9px;padding:13px;font-weight:800}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.section-title{display:block;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px}
-.input,select,textarea{width:100%;border:1px solid var(--line);border-radius:9px;padding:11px;background:#fff}
-textarea{min-height:80px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:not-allowed;opacity:.36}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #ff777a;outline-offset:3px}
+.container{max-width:940px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 17px calc(112px + env(safe-area-inset-bottom,0px))}
+header{display:flex;align-items:center;gap:12px;position:relative;padding:4px 2px 21px;border-bottom:1px solid #24262c;margin-bottom:22px}
+.brand-logo{width:56px;height:56px;object-fit:cover;flex:0 0 56px;border:1px solid #573034;border-radius:15px;box-shadow:0 5px 20px #0008,0 0 0 3px #ffffff06}
+.brand-copy{min-width:0;flex:1}
+h1{font-size:clamp(20px,5.4vw,28px);font-style:italic;font-weight:950;letter-spacing:-.045em;line-height:1;margin:0;text-transform:uppercase}
+h1 span{color:#f4484c}
+.subtitle{font-size:11px;color:#9ea1aa;letter-spacing:.085em;text-transform:uppercase;margin-top:6px;font-weight:700}
+.unit-display{font-size:10px;color:#b8b9c0;margin-top:7px}
+.unit-display strong{color:#fff}
+.unit-chip{align-self:center;color:#ff666b;background:#33191d;border:1px solid #673033;border-radius:99px;padding:8px 10px;font-size:11px;font-weight:900;letter-spacing:.04em}
+.screen-intro{padding:0 3px 2px;margin:2px 0 14px}
+.eyebrow{font-size:10px;font-weight:900;letter-spacing:.19em;color:#f45b60;text-transform:uppercase;margin-bottom:6px}
+h2{font-size:clamp(25px,7.2vw,34px);line-height:1.13;margin:0;font-weight:900;letter-spacing:-.05em}
+.screen-intro p{font-size:13px;color:var(--muted);margin:8px 0 0;line-height:1.45}
+.card{border:1px solid #35383f;background:linear-gradient(155deg,#1c1e23 0%,#15171a 82%);border-radius:18px;padding:17px;margin-top:13px;box-shadow:0 12px 26px #0005, inset 0 1px #ffffff0a}
+.card.accent-card{border-color:#563036;background:linear-gradient(147deg,#29171b 0%,#19191c 40%,#131518 100%)}
+.card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.section-title{display:block;color:#d7d9dd;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.section-title .section-mark{color:#ff5358;margin-right:7px}
+.note{font-size:12px;color:var(--muted);line-height:1.6}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .hidden{display:none!important}
-.total{text-align:center;font-size:58px;font-weight:800;letter-spacing:-.04em;margin:4px 0 0}
-.total small{font-size:22px;margin-left:5px}.status{text-align:center;color:var(--muted);margin-top:6px;min-height:21px}
-.barStage{height:175px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.bar{position:relative;width:94%;height:12px;background:#777;border-radius:2px}
-.sleeve{position:absolute;top:50%;transform:translateY(-50%);width:35%;height:18px;background:#999;border-radius:2px}.sleeve.left{left:2%}.sleeve.right{right:2%}
-.collar{position:absolute;top:50%;transform:translateY(-50%);width:10px;height:34px;background:#666;border-radius:2px}.collar.left{left:35%}.collar.right{right:35%}
-.stack{position:absolute;top:50%;display:flex;align-items:center;transform:translateY(-50%)}.stack.left{right:65%;flex-direction:row-reverse}.stack.right{left:65%}
-.plate{display:flex;align-items:center;justify-content:center;border:1px solid #ddd;font-size:12px;font-weight:800;line-height:1;border-radius:5px;color:#fff;flex:0 0 auto}
-.plate-label{display:block;white-space:nowrap;transform:rotate(-90deg)}
-.plate.small{height:60px;width:15px}.plate.large{height:80px}.plate.red{background:#d63c32;width:20px}.plate.blue{background:#2f6fcb;width:20px}.plate.yellow{background:#e5c735;width:20px}.plate.green{background:#39934a;width:20px}.plate.black{background:#111;width:20px}
-.plate.yellow,.plate.green,.plateButton.yellow,.plateButton.green{color:#111}
-.plateButtons{display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem}
-.plateButton{position:relative;border:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;min-width:52px;width:52px;height:52px;color:#fff;font-size:14px;padding:0}
-.plateButton.large{width:62px;height:62px}.plateButton:disabled{opacity:.28}
-.badge{position:absolute;top:-5px;right:-5px;width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid #000;color:#000;display:flex;align-items:center;justify-content:center;font-size:10px}
-.inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.inv-row{display:grid;grid-template-columns:1fr 72px;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:9px 10px}.inv-row input{width:100%;border:1px solid var(--line);border-radius:6px;padding:7px;text-align:center}
-.note{font-size:13px;color:var(--muted);line-height:1.45}.result-list{margin-top:12px;line-height:1.7}
-.pr-card{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;background:#fff}
-.pr-name{font-weight:800}.pr-value{font-size:22px;font-weight:800;text-align:right}.pr-meta{font-size:12px;color:var(--muted);margin-top:3px}.pr-change{font-size:12px;color:var(--good)}
-.history-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-.pr-actions{grid-column:1/-1;justify-content:flex-end}.pr-history-entry{display:grid;grid-template-columns:1fr auto;gap:10px;padding:12px 0;border-top:1px solid var(--line)}#prHistoryDisclosure>summary{cursor:pointer;font-weight:800;font-size:17px;list-style-position:inside}#prHistoryDisclosure[open]>summary{margin-bottom:4px}.pr-history-entry .history-details{min-width:0}.pr-history-entry .history-actions{justify-content:flex-end;align-items:center}.pr-inline-form{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;min-width:0}.pr-inline-form .section-title{letter-spacing:0;text-transform:none}.pr-inline-form label{display:block;min-width:0}.pr-inline-form textarea{min-height:72px}
-.percent-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.percent-card{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}.percent-card strong{font-size:20px}
-.backup-box{display:flex;gap:8px;flex-wrap:wrap}
-@media(max-width:460px){.pr-inline-form .grid2{grid-template-columns:1fr}.pr-actions{justify-content:flex-start}}
-@media(max-width:379px){header{gap:10px}.brand-logo{width:46px;height:46px}h1{font-size:26px}}
-@media(min-width:680px){.home-grid{grid-template-columns:repeat(4,1fr)}.inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.percent-grid{grid-template-columns:repeat(4,1fr)}}
-@media(min-width:900px){.plate.large{height:120px}.plate.red{width:55px}.plate.blue{width:45px}.plate.yellow{width:35px}.plate.green{width:25px}.plate.black.large{width:20px}}
+.navbar{max-width:940px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+#topNav{position:fixed;z-index:100;bottom:0;left:0;right:0;background:#141519ed;border-top:1px solid #34363c;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:9px 10px calc(8px + env(safe-area-inset-bottom,0px));box-shadow:0 -12px 24px #0009}
+.navbtn{min-height:58px;border:0;background:transparent;color:#9a9da5;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;font-size:10px;font-weight:800;letter-spacing:.01em;padding:5px 2px}
+.navbtn svg{height:22px;width:22px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.navbtn.active{color:#ff5358;background:#e33b4012}
+.navbtn:active{background:#a52c3133}
+.choice,.secondary{border:1px solid #494a50;background:linear-gradient(165deg,#292b30,#1c1e21);color:#f3f4f5;border-radius:11px;padding:11px 14px;font-weight:750;min-height:44px;font-size:13px;box-shadow:inset 0 1px #ffffff10}
+.choice.active,.primary{background:linear-gradient(180deg,#ed4146,#a71f27);color:#fff;border:1px solid #ff696c;box-shadow:inset 0 1px #ffffff25,0 4px 12px #0005}
+.primary{border-radius:12px;padding:14px 16px;font-weight:900;min-height:48px;width:100%}
+.secondary:hover,.choice:hover:not(.active){border-color:#777a81}
+.calcTabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:7px;margin-top:0}
+.calcTabs .choice{width:100%;font-size:13px}
+.input,select,textarea{width:100%;border:1px solid #44474e;border-radius:11px;padding:12px;color:var(--text);background:#101115;font-size:16px;min-width:0}
+select{color-scheme:dark}
+textarea{min-height:82px;resize:vertical}
+input[type=date]{color-scheme:dark}
+input::placeholder,textarea::placeholder{color:#737780}
+.total{text-align:center;font-weight:950;font-size:clamp(55px,13vw,76px);letter-spacing:-.075em;line-height:1.03;margin:5px 0 6px;text-shadow:0 3px 10px #000b;font-variant-numeric:tabular-nums}
+.total small{font-size:19px;letter-spacing:0;margin-left:9px;font-weight:900;color:#dcdee1;text-transform:uppercase}
+.status{text-align:center;color:#abb0b8;font-size:12px;line-height:1.5;min-height:19px}
+.total::after{content:"";display:block;height:4px;border-radius:99px;background:linear-gradient(90deg,transparent,#f33a42,transparent);max-width:118px;margin:14px auto 0}
+.barStage{position:relative;height:218px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:14px;margin-top:11px;background:radial-gradient(ellipse at center,#2b2e33 0%,#111317 70%);border:1px solid #34373c}
+.barStage::after{content:"";position:absolute;bottom:0;left:0;right:0;height:45px;background:repeating-linear-gradient(0deg,#ffffff05 0 1px,transparent 1px 12px);transform:perspective(110px) rotateX(28deg);pointer-events:none}
+.bar{position:relative;width:95%;height:11px;background:linear-gradient(#fafafa,#9d9ea0 32%,#5e6064 72%,#c3c4c5);border-radius:3px;box-shadow:0 4px 7px #000a}
+.sleeve{position:absolute;top:50%;transform:translateY(-50%);width:35%;height:17px;background:linear-gradient(#ededed,#83858a,#cacbd0);border:1px solid #c4c5ca;border-radius:2px}
+.sleeve.left{left:1%}.sleeve.right{right:1%}
+.collar{position:absolute;top:50%;transform:translateY(-50%);width:9px;height:38px;background:linear-gradient(90deg,#55575b,#ddd,#575a5e);border:1px solid #555;border-radius:2px}
+.collar.left{left:35%}.collar.right{right:35%}
+.stack{position:absolute;top:50%;display:flex;align-items:center;transform:translateY(-50%);z-index:2}
+.stack.left{right:65%;flex-direction:row-reverse}.stack.right{left:65%}
+.plate{display:flex;align-items:center;justify-content:center;border:1px solid #ffffff58;font-size:12px;font-weight:950;line-height:1;border-radius:6px;color:#fff;flex:0 0 auto;box-shadow:inset 4px 0 6px #ffffff26,inset -5px 0 6px #0009,2px 4px 7px #0007}
+.plate-label{display:block;white-space:nowrap;transform:rotate(-90deg);text-shadow:0 1px 3px #000b}
+.plate.small{height:59px;width:16px;font-size:10px}.plate.large{height:116px}
+.plate.red{background:linear-gradient(90deg,#8f1520,#e6434b 45%,#9b1825);width:28px}
+.plate.blue{background:linear-gradient(90deg,#123e79,#3483df 45%,#113e73);width:27px}
+.plate.yellow{background:linear-gradient(90deg,#937322,#f3d14c 45%,#997518);width:25px}
+.plate.green{background:linear-gradient(90deg,#12582b,#4dc36b 45%,#13532b);width:24px}
+.plate.black{background:linear-gradient(90deg,#101114,#484b51 45%,#080a0c);width:18px}
+.plate.yellow,.plate.green,.plateButton.yellow,.plateButton.green{color:#0d0e10}
+.plateButtons{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;padding:4px 0 2px}
+.plateButton{border:3px double #ffffff58!important;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;min-width:55px;width:55px;height:55px;color:#fff;font-size:14px;font-weight:950;padding:0;position:relative;box-shadow:inset 0 4px 11px #ffffff24,inset 0 -9px 14px #0006,0 6px 10px #0009}
+.plateButton.large{min-width:63px;width:63px;height:63px}
+.plateButton:disabled{opacity:.26;filter:grayscale(.5)}
+.badge{position:absolute;top:-7px;right:-5px;display:flex;justify-content:center;align-items:center;border-radius:50%;min-width:21px;height:21px;background:#eee;border:2px solid #18191d;color:#1a1a1d;font-size:10px}
+.result-list{font-size:12px;color:#cbd0d6;line-height:1.8;margin-top:10px}
+.inventory-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.inv-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;border:1px solid #35383f;border-radius:12px;padding:10px 12px;background:#13151a}
+.inv-identity{display:flex;align-items:center;gap:11px;font-size:14px;font-weight:850}
+.inv-color{height:29px;width:6px;border-radius:8px;background:var(--plate-color,#aaa);box-shadow:0 0 9px #0009}
+.inv-controls{display:flex;align-items:center;gap:6px}
+.inv-controls input{color:#fff;width:43px;text-align:center;background:#101115;border:1px solid #3b3e45;border-radius:8px;padding:9px 2px;font-size:16px}
+.inv-controls button{width:38px;height:39px;padding:0;border-radius:9px;border:1px solid #4c4d54;background:#24262c;color:#fff;font-size:20px;font-weight:700}
+.pr-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+.pr-stat{padding:6px 9px;text-align:center;border-right:1px solid #383a40;min-width:0}
+.pr-stat:last-child{border:0}
+.pr-stat .stat-label{color:#a4a5ae;font-size:10px;font-weight:750;min-height:27px}
+.pr-stat strong{display:block;font-size:clamp(17px,5vw,25px);letter-spacing:-.04em;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#prList{display:grid;grid-template-columns:1fr;gap:10px}
+.pr-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:9px;border:1px solid #3a3c43;border-radius:15px;padding:15px;background:linear-gradient(155deg,#222429,#17191d);box-shadow:inset 0 1px #ffffff09}
+.pr-name{font-size:15px;font-weight:850}
+.pr-value{font-size:23px;font-weight:950;color:#f9f9fb;letter-spacing:-.05em;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pr-meta{color:#a8acb4;font-size:11px;margin-top:5px;line-height:1.55}
+.pr-change{color:var(--good);font-size:12px}
+.pr-actions{grid-column:1/-1;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;margin-top:5px}
+.pr-actions .secondary,.history-actions .secondary{min-height:36px;padding:8px 11px;font-size:11px}
+.pr-actions .newPR{background:#922329;border-color:#d34148}
+.pr-history-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 10px;padding:13px 2px;border-top:1px solid #3a3d43;align-items:start}
+.pr-history-entry:first-child{border-top:0}
+.pr-history-entry .history-details{min-width:0;font-size:13px}
+.pr-history-entry .history-actions{grid-column:1/-1;justify-content:flex-end;gap:8px}
+.history-actions .deletePR{color:#ff797d;border-color:#713238}
+#prHistoryDisclosure>summary{cursor:pointer;font-weight:900;font-size:15px;list-style:none;display:flex;gap:7px;align-items:center}
+#prHistoryDisclosure>summary::-webkit-details-marker{display:none}
+#prHistoryDisclosure>summary::before{content:"◷";font-size:24px;color:#ff4d55}
+#prHistoryDisclosure>summary::after{content:"▾";margin-left:auto;color:#ff5c62;font-size:20px;transition:transform .15s}
+#prHistoryDisclosure[open]>summary::after{transform:rotate(180deg)}
+#prHistoryDisclosure[open]>summary{margin-bottom:12px}
+.pr-inline-form{grid-column:1/-1;border-top:1px solid #44464c;padding-top:14px;min-width:0;margin-top:8px}
+.pr-inline-form .section-title{letter-spacing:.02em;text-transform:none}
+.pr-inline-form label{display:block;min-width:0}
+.pr-inline-form textarea{min-height:72px}
+.percent-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.percent-card{min-height:91px;border:1px solid #373b43;border-radius:14px;padding:14px;text-align:left;background:linear-gradient(155deg,#24262a,#15161a);color:#c2c4cc}
+.percent-card span{font-size:13px;font-weight:750;color:#fb5a61}
+.percent-card strong{font-size:19px;color:#fff;display:inline-block;margin-top:7px}
+.percent-card:hover{border-color:#be3c45}
+.backup-box{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.backup-box .secondary{display:flex;justify-content:center;align-items:center;text-align:center}
+.screen-intro + .card{margin-top:12px}
+@media(max-width:460px){.pr-inline-form .grid2{grid-template-columns:1fr}.pr-actions{justify-content:flex-start}.barStage{height:191px}.card{padding:14px}.container{padding-left:13px;padding-right:13px}h1{font-size:21px}.unit-chip{font-size:10px;padding:7px}.pr-stats .pr-stat{padding:6px 4px}}
+@media(min-width:650px){.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#prList{grid-template-columns:repeat(2,minmax(0,1fr))}.percent-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.barStage{height:250px}.plate.large{height:138px}.plate.red{width:35px}.plate.blue{width:33px}.plate.yellow{width:30px}.plate.green{width:28px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+
 </style>
 </head>
 <body>
 <div class="container">
 <header>
-  <img class="brand-logo" src="./assets/icon-192.png?v=4" alt="" width="52" height="52" decoding="async">
-  <div class="brand-copy"><h1>CrossFit Tools</h1><div class="subtitle">Barbell loading, PRs, percentages, and shared settings.</div><div class="note">App units: <strong id="appUnitLabel">KG</strong></div></div>
+  <img class="brand-logo" src="./assets/icon-192.png?v=4" alt="" width="56" height="56" decoding="async">
+  <div class="brand-copy">
+    <h1>CrossFit <span>Tools</span></h1>
+    <div class="subtitle">TRAIN SMART · LIFT HEAVY</div>
+    <div class="unit-display">GLOBAL UNIT · <strong id="appUnitLabel">KG</strong></div>
+  </div>
+  <div class="unit-chip">STRENGTH</div>
 </header>
 
-<div id="topNav" class="card hidden">
+<nav id="topNav" aria-label="App navigation">
   <div class="navbar">
-    <button class="navbtn" data-view="home">Home</button>
-    <button class="navbtn" data-view="barbell">Barbell</button>
-    <button class="navbtn" data-view="prs">PRs</button>
-    <button class="navbtn" data-view="percent">Percentages</button>
-    <button class="navbtn" data-view="settings">Settings</button>
+    <button class="navbtn" data-view="barbell" aria-label="Barbell">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 10v4m3-7v10m3-5h8m3-5v10m3-7v4M8 10v4m8-4v4"/></svg><span>Barbell</span>
+    </button>
+    <button class="navbtn" data-view="prs" aria-label="PRs">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v7a5 5 0 0 1-10 0V4Z"/><path d="M7 6H3v2a4 4 0 0 0 4 4m10-6h4v2a4 4 0 0 1-4 4M12 16v4m-5 0h10"/></svg><span>PRs</span>
+    </button>
+    <button class="navbtn" data-view="percent" aria-label="Percentages">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="7" r="2"/><circle cx="17" cy="17" r="2"/><path d="M20 4 4 20"/></svg><span>Percentages</span>
+    </button>
+    <button class="navbtn" data-view="settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 2h4l.7 2.4 2.1.9 2.2-1.2 2.8 2.8-1.2 2.2.9 2.1 2.5.8v4l-2.5.7-.9 2.1 1.2 2.2-2.8 2.8-2.2-1.2-2.1.9-.7 2.5h-4l-.8-2.5-2.1-.9-2.2 1.2-2.8-2.8 1.2-2.2-.9-2.1L2 14v-4l2.4-.8.9-2.1-1.2-2.2L6.9 2l2.2 1.2 2.1-.9Z" transform="translate(0 -1) scale(.93)"/><circle cx="12" cy="12" r="3"/></svg><span>Settings</span>
+    </button>
   </div>
-</div>
-
-<section id="view-home">
-  <div class="home-grid">
-    <button class="home-tool" data-go="barbell"><div class="icon">🏋️</div><strong>Barbell Calculator</strong><span>Build or reverse-calculate a bar.</span></button>
-    <button class="home-tool" data-go="prs"><div class="icon">🏆</div><strong>Barbell PRs</strong><span>Track current PRs and full history.</span></button>
-    <button class="home-tool" data-go="percent"><div class="icon">📊</div><strong>Percentages</strong><span>Turn a PR into working weights.</span></button>
-    <button class="home-tool" data-go="settings"><div class="icon">⚙️</div><strong>Settings</strong><span>Units, plates, backup and restore.</span></button>
-  </div>
-</section>
-
+</nav>
 <section id="view-barbell" class="hidden">
-  <div class="card">
+  <div class="screen-intro"><div class="eyebrow">BARBELL LAB</div><h2>LOAD YOUR BAR.</h2><p>Every plate counts. Build or reverse-calculate your lift.</p></div>
+  <div class="card calcTabs">
     <div class="row">
       <button class="choice calcTab active" data-tab="build">Build Bar</button>
       <button class="choice calcTab" data-tab="reverse">Reverse Calculator</button>
@@ -103,15 +179,15 @@ textarea{min-height:80px}
   </div>
 
   <div id="buildPane">
-    <div class="card"><div class="total"><span id="buildTotal">—</span><small id="buildUnitLabel">kg</small></div><div class="status" id="buildStatus" role="status">Choose a barbell before adding plates.</div>
+    <div class="card accent-card"><div class="section-title" style="text-align:center;margin-bottom:10px">CURRENT LOAD</div><div class="total"><span id="buildTotal">—</span><small id="buildUnitLabel">kg</small></div><div class="status" id="buildStatus" role="status">Choose a barbell before adding plates.</div>
       <div class="barStage"><div class="bar"><div class="sleeve left"></div><div class="sleeve right"></div><div class="collar left"></div><div class="collar right"></div><div class="stack left" id="buildLeft"></div><div class="stack right" id="buildRight"></div></div></div>
     </div>
-    <div class="card"><span class="section-title">1. Choose a barbell</span><div class="row" id="buildBars"></div></div>
-    <div class="card"><span class="section-title">2. Add plate pairs</span><div class="note" id="buildPlateHint" style="margin-bottom:10px">Choose a barbell above to enable plates.</div><div class="plateButtons" id="buildPlates"></div><div class="row" style="margin-top:10px"><button class="secondary" id="undoBuild">Undo</button><button class="secondary" id="resetBuild">Reset</button></div><div class="result-list" id="buildBreakdown"></div></div>
+    <div class="card"><span class="section-title"><span class="section-mark">01</span> Choose your barbell</span><div class="row" id="buildBars"></div></div>
+    <div class="card"><span class="section-title"><span class="section-mark">02</span> Add plate pairs</span><div class="note" id="buildPlateHint" style="margin-bottom:10px">Choose a barbell above to enable plates.</div><div class="plateButtons" id="buildPlates"></div><div class="row" style="margin-top:10px"><button class="secondary" id="undoBuild">Undo</button><button class="secondary" id="resetBuild">Reset</button></div><div class="result-list" id="buildBreakdown"></div></div>
   </div>
 
   <div id="reversePane" class="hidden">
-    <div class="card"><div class="total"><span id="reverseTotal">—</span><small id="reverseUnitLabel">kg</small></div><div class="status" id="reverseStatus" role="status">Choose a barbell before calculating plates.</div>
+    <div class="card accent-card"><div class="section-title" style="text-align:center;margin-bottom:10px">CALCULATED LOAD</div><div class="total"><span id="reverseTotal">—</span><small id="reverseUnitLabel">kg</small></div><div class="status" id="reverseStatus" role="status">Choose a barbell before calculating plates.</div>
       <div class="barStage"><div class="bar"><div class="sleeve left"></div><div class="sleeve right"></div><div class="collar left"></div><div class="collar right"></div><div class="stack left" id="reverseLeft"></div><div class="stack right" id="reverseRight"></div></div></div>
     </div>
     <div class="card"><span class="section-title">Target total weight (<span id="targetUnitLabel">kg</span>)</span><input class="input" id="targetWeight" type="number" min="0" step="0.25" inputmode="decimal" placeholder="e.g. 225"></div>
@@ -121,6 +197,8 @@ textarea{min-height:80px}
 </section>
 
 <section id="view-prs" class="hidden">
+  <div class="screen-intro"><div class="eyebrow">YOUR PROGRESS</div><h2>PERSONAL RECORDS.</h2><p>Own your numbers. Every rep has a story.</p></div>
+  <div class="card"><div class="pr-stats"><div class="pr-stat"><div class="stat-label">PR ENTRIES</div><strong id="statEntries">0</strong></div><div class="pr-stat"><div class="stat-label">HEAVIEST</div><strong id="statHeaviest">—</strong></div><div class="pr-stat"><div class="stat-label">LAST PR</div><strong id="statLastPR">—</strong></div></div></div>
   <div class="card">
     <span class="section-title">Personal Records</span>
     <div class="note">Edit a current PR, or tap New PR to record another lift. All saved attempts remain in history until you delete them.</div>
@@ -139,6 +217,7 @@ textarea{min-height:80px}
 </section>
 
 <section id="view-percent" class="hidden">
+  <div class="screen-intro"><div class="eyebrow">TRAINING INTENSITY</div><h2>PERCENTAGES.</h2><p>From your best lift to your next working set.</p></div>
   <div class="card">
     <span class="section-title">Percentage Calculator</span>
     <div class="grid2">
@@ -154,14 +233,15 @@ textarea{min-height:80px}
 </section>
 
 <section id="view-settings" class="hidden">
+  <div class="screen-intro"><div class="eyebrow">YOUR GEAR</div><h2>SETTINGS.</h2><p>One global unit. Your plates. Your data.</p></div>
   <div class="card">
-    <span class="section-title">App Units</span>
+    <span class="section-title"><span class="section-mark">⚖</span> Global Units</span>
     <div class="row"><button class="choice settingUnit" data-unit="kg" aria-pressed="true">KG</button><button class="choice settingUnit" data-unit="lb" aria-pressed="false">LB</button></div>
     <div class="note" style="margin-top:10px">Your choice is saved and applies to all calculators, PRs, and plate inventory. Changing units requires a new barbell selection.</div>
   </div>
 
   <div class="card">
-    <span class="section-title">Available Plate Pairs (<span id="inventoryUnitLabel">kg</span>)</span>
+    <span class="section-title"><span class="section-mark">◉</span> Plate Inventory · <span id="inventoryUnitLabel">kg</span></span>
     <div class="note">Set the available pairs for the selected app unit. Your KG and LB inventories are saved separately.</div>
     <div class="row" style="margin:10px 0">
       <button class="secondary" id="prefNone">None</button><button class="secondary" id="prefAll">All available</button>
@@ -170,11 +250,11 @@ textarea{min-height:80px}
   </div>
 
   <div class="card">
-    <span class="section-title">Data Backup</span>
-    <div class="note">Exports all PRs, preferences, and plate inventory as one JSON file.</div>
+    <span class="section-title"><span class="section-mark">↧</span> Backup & Restore</span>
+    <div class="note">Your records stay on this device. Export a file before replacing your iPhone Home Screen shortcut.</div>
     <div class="backup-box" style="margin-top:10px">
-      <button class="secondary" id="exportData">Export Backup</button>
-      <label class="secondary" style="display:inline-flex;align-items:center">Import Backup<input id="importData" type="file" accept="application/json" style="display:none"></label>
+      <button class="secondary" id="exportData">↓ Export Backup</button>
+      <label class="secondary" style="display:inline-flex;align-items:center">↑ Import Backup<input id="importData" type="file" accept="application/json" style="display:none"></label>
     </div>
   </div>
 </section>
@@ -213,7 +293,7 @@ function bestCombination(targetPerSide,unit,inventory){
 function showView(name){
   document.querySelectorAll('[id^="view-"]').forEach(v=>v.classList.add("hidden"));
   $("view-"+name).classList.remove("hidden");
-  $("topNav").classList.toggle("hidden",name==="home");
+  $("topNav").classList.remove("hidden");
   document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.view===name));
   if(name==="prs")renderPRs();
   if(name==="percent")renderPercentage();
@@ -445,7 +525,7 @@ $("exportData").onclick=()=>{
 };
 $("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];prEditor=null;["targetWeight","pctBaseWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
 
-initMovementSelects();renderApp();
+initMovementSelects();renderApp();showView("barbell");
 </script>
 <script>
 if ("serviceWorker" in navigator) {
