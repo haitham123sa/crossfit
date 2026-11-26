@@ -159,10 +159,69 @@ input::placeholder,textarea::placeholder{color:#737780}
 #cloudStatus,#cloudSyncStatus,#cloudError{line-height:1.55}
 #cloudError:not(:empty){color:#ff8b8e;margin-top:12px}
 
+
+body.auth-locked #appShell{display:none!important}
+body.auth-unlocked #authGate{display:none!important}
+#authGate{min-height:100dvh;min-height:100svh;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) 16px calc(34px + env(safe-area-inset-bottom,0px));background:radial-gradient(ellipse 80% 35% at 50% 8%,#431a23,transparent),#090a0c}
+.auth-gate-inner{width:100%;max-width:430px}
+.auth-gate-brand{display:flex;align-items:center;justify-content:center;gap:13px;margin-bottom:26px}
+.auth-gate-brand img{width:64px;height:64px;border-radius:16px;border:1px solid #67363b}
+.auth-gate-brand h1{font-size:clamp(31px,9vw,43px);line-height:1;margin:0}
+.auth-gate-brand p{font-size:10px;font-weight:850;letter-spacing:.17em;color:#bfc1c7;margin:6px 0 0}
+.auth-gate-head{text-align:center}
+.auth-gate-head h2{font-size:clamp(25px,7.2vw,32px);margin-bottom:7px}
+.auth-gate-head p{color:#b3b8c2;line-height:1.5;font-size:13px;margin:0}
+#authGate #cloudCard{margin-top:20px;border-color:#5e3038;background:linear-gradient(155deg,#241a1e,#151619 80%);box-shadow:0 16px 50px #0008}
+#authGate #cloudCard .section-title{color:#f5e1e3}
+#authGate #cloudCard .cloud-form input{min-height:49px}
+#authGate #cloudCard .cloud-actions .primary{flex-basis:100%}
+#authGate #cloudCard .cloud-actions .secondary{flex:1 1 43%}
+.auth-gate-note{text-align:center;margin-top:20px;color:#9c9fa6;font-size:12px;line-height:1.6}
+.auth-backup{display:block;margin:12px auto 0;padding:11px 13px;border:1px solid #42454a;border-radius:11px;color:#e6e8eb;background:#1b1d22;font-weight:750;font-size:12px}
+
 </style>
 </head>
-<body>
-<div class="container">
+<body class="auth-locked">
+<section id="authGate" aria-label="H-FORGE member sign-in">
+  <div class="auth-gate-inner">
+    <div class="auth-gate-brand">
+      <img src="./assets/icon-192.png?v=4" alt="" width="64" height="64">
+      <div><h1>H-<span>FORGE</span></h1><p>BUILT FOR THE BAR.</p></div>
+    </div>
+    <div class="auth-gate-head">
+      <div class="eyebrow">YOUR STRENGTH. YOUR ACCOUNT.</div>
+      <h2>UNLOCK YOUR TRAINING.</h2>
+      <p>Create a free account or sign in to access your barbell calculator and personal records.</p>
+    </div>
+<div class="card" id="cloudCard">
+    <span class="section-title"><span class="section-mark">☁</span> Account & Cloud Sync</span>
+    <p class="note" id="cloudStatus" role="status">Checking your secure sign-in…</p>
+    <div id="cloudAuthForm" class="hidden">
+      <div class="cloud-form">
+        <label><span class="section-title">Email address</span><input id="cloudEmailInput" class="input" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Account email"></label>
+        <label><span class="section-title">Password</span><input id="cloudPasswordInput" class="input" type="password" autocomplete="current-password" placeholder="At least 8 characters" aria-label="Account password"></label>
+      </div>
+      <div class="cloud-actions"><button type="button" class="primary" id="cloudSignIn">Sign in</button><button type="button" class="secondary" id="cloudSignUp">Create account</button><button type="button" class="secondary" id="cloudReset">Reset password</button></div>
+      <p class="note">Signing in keeps guest data separate. You can import existing PRs after signing in.</p>
+    </div>
+    <div id="cloudSignedIn" class="hidden">
+      <div class="cloud-account" id="cloudEmail"></div>
+      <p class="note" id="cloudSyncStatus" role="status">Connecting…</p>
+      <div class="cloud-actions"><button type="button" class="primary" id="cloudSyncNow">Sync now</button><button type="button" class="secondary" id="cloudImportDevice">Import device PRs</button><button type="button" class="secondary" id="cloudSignOut">Sign out</button></div>
+      <p class="note">Your guest records are kept separately. A copy of signed-in records also stays on this device for offline use.</p>
+    </div>
+    <div id="cloudConflict" class="cloud-warning hidden">
+      <strong>Cloud and device copies differ.</strong>
+      <p class="note">Choose which copy to use. Export a backup first if you want to keep both.</p>
+      <div class="cloud-actions"><button type="button" class="secondary" id="cloudUseCloud">Use cloud copy</button><button type="button" class="secondary" id="cloudKeepDevice">Replace cloud with device copy</button></div>
+    </div>
+    <p id="cloudError" class="note" role="alert" aria-live="polite"></p>
+  </div>
+    <p class="auth-gate-note">Existing device PRs are preserved for import after you sign in. Export a backup first if you want an extra copy.</p>
+    <button id="authGuestBackup" type="button" class="auth-backup">↓ Export existing device PRs</button>
+  </div>
+</section>
+<div class="container" id="appShell" inert aria-hidden="true">
 <header>
   <img class="brand-logo" src="./assets/icon-192.png?v=4" alt="" width="56" height="56" decoding="async">
   <div class="brand-copy">
@@ -254,30 +313,7 @@ input::placeholder,textarea::placeholder{color:#737780}
 
 <section id="view-settings" class="hidden">
   <div class="screen-intro"><div class="eyebrow">YOUR GEAR</div><h2>SETTINGS.</h2><p>One global unit. Your plates. Your data.</p></div>
-  <div class="card" id="cloudCard">
-    <span class="section-title"><span class="section-mark">☁</span> Account & Cloud Sync</span>
-    <p class="note" id="cloudStatus" role="status">Cloud accounts aren't connected yet. Local PRs and calculations still work.</p>
-    <div id="cloudAuthForm" class="hidden">
-      <div class="cloud-form">
-        <label><span class="section-title">Email address</span><input id="cloudEmailInput" class="input" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Account email"></label>
-        <label><span class="section-title">Password</span><input id="cloudPasswordInput" class="input" type="password" autocomplete="current-password" placeholder="At least 8 characters" aria-label="Account password"></label>
-      </div>
-      <div class="cloud-actions"><button type="button" class="primary" id="cloudSignIn">Sign in</button><button type="button" class="secondary" id="cloudSignUp">Create account</button><button type="button" class="secondary" id="cloudReset">Reset password</button></div>
-      <p class="note">Signing in keeps guest data separate. You can import existing PRs after signing in.</p>
-    </div>
-    <div id="cloudSignedIn" class="hidden">
-      <div class="cloud-account" id="cloudEmail"></div>
-      <p class="note" id="cloudSyncStatus" role="status">Connecting…</p>
-      <div class="cloud-actions"><button type="button" class="primary" id="cloudSyncNow">Sync now</button><button type="button" class="secondary" id="cloudImportDevice">Import device PRs</button><button type="button" class="secondary" id="cloudSignOut">Sign out</button></div>
-      <p class="note">Your guest records are kept separately. A copy of signed-in records also stays on this device for offline use.</p>
-    </div>
-    <div id="cloudConflict" class="cloud-warning hidden">
-      <strong>Cloud and device copies differ.</strong>
-      <p class="note">Choose which copy to use. Export a backup first if you want to keep both.</p>
-      <div class="cloud-actions"><button type="button" class="secondary" id="cloudUseCloud">Use cloud copy</button><button type="button" class="secondary" id="cloudKeepDevice">Replace cloud with device copy</button></div>
-    </div>
-    <p id="cloudError" class="note" role="alert" aria-live="polite"></p>
-  </div>
+  <div id="cloudCardSlot"></div>
 
   <div class="card">
     <span class="section-title"><span class="section-mark">⚖</span> Global Units</span>
@@ -618,6 +654,16 @@ function applyHForgeCloudData(data){
 function safeGuestState(){
   try{return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)))}catch{return defaultState()}
 }
+$("authGuestBackup").onclick=()=>{
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw){alert("There are no existing device records to export yet.");return}
+  try{
+    const json=JSON.stringify(normalizeState(JSON.parse(raw)),null,2);
+    const blob=new Blob([json],{type:"application/json"}),url=URL.createObjectURL(blob),link=document.createElement("a");
+    link.href=url;link.download="h-forge-guest-backup.json";link.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000)
+  }catch{alert("Could not export the device records. Keep this installation until your data can be recovered.")}
+};
 window.HForgeApp={
   getState:()=>JSON.parse(JSON.stringify({preferredUnit:state.preferredUnit,inventory:state.inventory,prs:state.prs})),
   getGuestState:safeGuestState,
@@ -629,7 +675,7 @@ window.HForgeApp={
 initMovementSelects();renderApp();showView("barbell");
 </script>
 <script src="./firebase-config.js?v=14"></script>
-<script src="./cloud.js?v=14"></script>
+<script src="./cloud.js?v=15"></script>
 <script>
 // Keep the page at 100% size in the installed iPhone app and Safari.
 // CSS permits normal one-finger panning; these handlers cover legacy WebKit pinch gestures.

@@ -17,6 +17,26 @@
   function syncStatus(text){$("cloudSyncStatus").textContent=text}
   function error(text){$("cloudError").textContent=text||""}
   function show(id,value){$(id).classList.toggle("hidden",!value)}
+  // Reuse the same account form on the welcome gate and inside Settings.
+  // The tools stay inert and hidden until Firebase confirms a signed-in user.
+  function lockApp(){
+    $("authGate").appendChild($("cloudCard"));
+    document.body.classList.add("auth-locked");
+    document.body.classList.remove("auth-unlocked");
+    $("appShell").inert=true;
+    $("appShell").setAttribute("aria-hidden","true");
+    $("authGate").removeAttribute("aria-hidden");
+    window.scrollTo?.({top:0,behavior:"instant"})
+  }
+  function unlockApp(){
+    $("cloudCardSlot").appendChild($("cloudCard"));
+    $("appShell").inert=false;
+    $("appShell").removeAttribute("aria-hidden");
+    $("authGate").setAttribute("aria-hidden","true");
+    document.body.classList.remove("auth-locked");
+    document.body.classList.add("auth-unlocked");
+    window.scrollTo?.({top:0,behavior:"instant"})
+  }
   function handleError(err){
     const code=err&&err.code;
     const messages={
@@ -141,15 +161,17 @@
     ready=false;working=false;remote=null;conflict=false;baseline=0;changeToken=0;
     show("cloudConflict",false);error("");
     if(!user){
+      lockApp();
       app.switchProfile(null);
       show("cloudAuthForm",true);show("cloudSignedIn",false);
-      status("Sign in to save PRs privately in the cloud. Guest data stays on this device.");
+      status("Sign in or create a free account to access H-FORGE. Your existing device PRs are preserved.");
       return
     }
     const uid=user.uid;
     const hasLocal=app.hasAccountCache(uid);
     app.switchProfile(uid);
     show("cloudAuthForm",false);show("cloudSignedIn",true);
+    unlockApp();
     $("cloudEmail").textContent=user.email||"Signed-in account";
     status("Signed in. Your account has a separate local profile.");
     syncStatus("Loading your private cloud data…");
@@ -196,9 +218,9 @@
     syncStatus(added+" guest PR entries copied. Sync pending; originals still on the device.")
   }
   async function start(){
-    if(!app){status("Cloud module could not load; local mode remains available.");return}
+    if(!app){status("Sign-in could not start. Reload when connected to the internet.");return}
     if(!configured){
-      status("Cloud accounts are not connected yet. H-FORGE still saves PRs locally. The owner must connect a free Firebase Spark project.");
+      status("Sign-in is temporarily unavailable. Please contact the app owner.");
       return
     }
     status("Connecting to cloud services…");
@@ -208,6 +230,7 @@
       const firebase=await import(url+"firebase-app.js");
       const fb=firebase.initializeApp(config);
       auth=A.getAuth(fb);db=F.getFirestore(fb);
+      if(A.setPersistence&&A.browserLocalPersistence)await A.setPersistence(auth,A.browserLocalPersistence);
       $("cloudSignUp").onclick=()=>authAction("signup");
       $("cloudSignIn").onclick=()=>authAction("signin");
       $("cloudReset").onclick=()=>authAction("reset");
@@ -215,11 +238,19 @@
       $("cloudUseCloud").onclick=acceptCloud;
       $("cloudKeepDevice").onclick=keepDevice;
       $("cloudImportDevice").onclick=importGuest;
-      $("cloudSignOut").onclick=async()=>{clearTimeout(syncTimer);try{await A.signOut(auth)}catch(e){error(handleError(e))}};
+      $("cloudSignOut").onclick=async()=>{
+        clearTimeout(syncTimer);
+        lockApp();
+        try{await A.signOut(auth)}
+        catch(e){
+          error(handleError(e));
+          if(auth.currentUser)handleUser(auth.currentUser)
+        }
+      };
       window.addEventListener("hforge:data-changed",e=>{if(e.detail?.uid===currentUser?.uid)markDirty()});
       window.addEventListener("online",()=>{if(currentUser){if(ready){const meta=readMeta(currentUser.uid);if(meta.dirty)syncNow();else checkCloud(currentUser.uid,session)}else checkCloud(currentUser.uid,session)}});
       A.onAuthStateChanged(auth,handleUser,e=>error(handleError(e)))
-    }catch(e){status("Cloud services couldn't start. Your device data still works offline.");error(handleError(e))}
+    }catch(e){lockApp();status("Sign-in is unavailable right now. Check your connection and reload.");error(handleError(e))}
   }
   start()
 })();

@@ -15,6 +15,15 @@
 
 Do not add a billing account or upgrade to Blaze. Do not enable SMS/Phone auth, Cloud Functions, or paid APIs. The Spark plan can temporarily block services if usage limits are reached. If that happens, H-FORGE keeps locally saved data and offline calculations working; cloud sync can resume once allowed. Firebase and Google may change free-tier policies; indefinite free cloud service cannot be guaranteed.
 
+## Mandatory sign-in
+
+- H-FORGE now requires Firebase Email/Password registration or sign-in **before entering the app**.
+- Signed-in sessions use Firebase browser-local persistence, allowing a returning authenticated user to re-enter without repeated login while their session remains valid.
+- On sign-out, the barbell and PR screens are hidden and the member sign-in screen returns.
+- Before registration, old guest records can be exported from the sign-in page with **Export existing device PRs**. After sign-in, they can be copied into the account via **Settings → Import device PRs**.
+- If Firebase cannot initialize or an unauthenticated user is offline, the sign-in gate remains locked; access requires an authenticated session. This is a UI gate, **not a server-side authorization boundary**: Firestore rules protect cloud records.
+- A returning signed-in session may work offline if its Firebase authentication libraries and session can load from device cache, but this has not been verified on a physical iPhone. Keep a JSON backup.
+
 ## How accounts work
 
 - **Settings → Account & Cloud Sync**: create an account or sign in using email and password.
