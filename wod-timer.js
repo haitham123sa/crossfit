@@ -65,34 +65,168 @@ function metrics(elapsed,c,m=mode){
 function elapsed(){
   return carried+((state==="running"||state==="prep")?Math.max(0,now()-anchor):0)
 }
+
+let audioMode=loadAudioMode(),mediaClips=Object.create(null),mediaUrls=Object.create(null);
+let audioResumePromise=null,audioNotice="Tap Test sound before your workout. If silent, try alternate audio.";
+function loadAudioMode(){
+  try{return localStorage.getItem("hforgeTimerAudioModeV1")==="media"?"media":"web"}catch{return"web"}
+}
+function audioNoticeText(message){
+  audioNotice=message;
+  const node=$("wodAudioStatus");
+  if(node)node.textContent=message
+}
+function primeWebAudio(){
+  if(muted||audioMode!=="web")return null;
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx){
+    audioNoticeText("Web Audio is unavailable. Tap Try alternate audio.");
+    return null
+  }
+  try{
+    if(!audio||audio.state==="closed")audio=new Ctx();
+    if(audio.state==="suspended"||audio.state==="interrupted"){
+      const ctx=audio;
+      if(!audioResumePromise){
+        let attempt;
+        try{attempt=ctx.resume()}catch(e){audioNoticeText("Audio start was blocked. Try alternate audio.");return ctx}
+        const pending=Promise.resolve(attempt).then(()=>{
+          if(audio!==ctx)return;
+          if(ctx.state==="running")audioNoticeText("Audio ready. You should hear the test beep.");
+          else audioNoticeText("Audio is still blocked. Try alternate audio and check iPhone Silent Mode.")
+        }).catch(()=>{
+          if(audio===ctx)audioNoticeText("iPhone blocked Web Audio. Tap Try alternate audio.")
+        });
+        audioResumePromise=pending;
+        pending.finally(()=>{if(audioResumePromise===pending)audioResumePromise=null})
+      }
+    }
+    return audio
+  }catch(e){
+    audioNoticeText("Web Audio could not start. Try alternate audio.");
+    return null
+  }
+}
+function retireWebAudio(){
+  if(audio){
+    const previous=audio;
+    audio=null;audioResumePromise=null;
+    try{Promise.resolve(previous.close?.()).catch(()=>{})}catch{}
+  }
+}
+function playTone(ctx,freq,duration,delay=0){
+  const at=ctx.currentTime+delay,osc=ctx.createOscillator(),gain=ctx.createGain();
+  osc.type="triangle";osc.frequency.value=freq;
+  gain.gain.setValueAtTime(.0001,at);
+  gain.gain.exponentialRampToValueAtTime(.22,at+.018);
+  gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.start(at);osc.stop(at+duration+.025)
+}
+function webCue(kind){
+  const ctx=primeWebAudio();
+  if(!ctx)return false;
+  const emit=()=>{
+    if(muted||document.hidden||audioMode!=="web"||audio!==ctx||ctx.state!=="running")return;
+    try{
+      if(kind==="go"){playTone(ctx,930,.24);playTone(ctx,1250,.32,.18)}
+      else if(kind==="done"){playTone(ctx,1000,.18);playTone(ctx,840,.2,.25);playTone(ctx,680,.35,.51)}
+      else if(kind==="rest")playTone(ctx,575,.24);
+      else playTone(ctx,840,.17)
+    }catch(e){audioNoticeText("Audio output failed. Tap Try alternate audio.")}
+  };
+  if(ctx.state==="running")emit();
+  else if(audioResumePromise)audioResumePromise.then(()=>emit());
+  else audioNoticeText("Audio is not ready. Tap Test sound, then try alternate audio.");
+  return true
+}
+function makeWav(kind){
+  // Offline, original beep sounds. WAV is constructed locally (no network/audio files).
+  const sounds={
+    tick:[[830,0,.17]],
+    go:[[920,0,.23],[1250,.19,.29]],
+    rest:[[570,0,.26]],
+    done:[[1000,0,.17],[850,.24,.2],[670,.5,.36]]
+  };
+  const segments=sounds[kind]||sounds.tick;
+  const rate=22050,duration=Math.max(...segments.map(v=>v[1]+v[2]))+.03;
+  const sampleCount=Math.ceil(rate*duration),buffer=new ArrayBuffer(44+sampleCount*2),view=new DataView(buffer);
+  function write(offset,text){for(let i=0;i<text.length;i++)view.setUint8(offset+i,text.charCodeAt(i))}
+  write(0,"RIFF");view.setUint32(4,36+sampleCount*2,true);write(8,"WAVE");write(12,"fmt ");
+  view.setUint32(16,16,true);view.setUint16(20,1,true);view.setUint16(22,1,true);
+  view.setUint32(24,rate,true);view.setUint32(28,rate*2,true);
+  view.setUint16(32,2,true);view.setUint16(34,16,true);write(36,"data");
+  view.setUint32(40,sampleCount*2,true);
+  for(let i=0;i<sampleCount;i++){
+    const time=i/rate;let sample=0;
+    for(const [freq,offset,length] of segments){
+      const p=time-offset;
+      if(p>=0&&p<length){
+        const envelope=Math.min(1,p/.015,(length-p)/.035);
+        sample+=Math.sin(p*2*Math.PI*freq)*Math.max(0,envelope)*.36
+      }
+    }
+    view.setInt16(44+i*2,Math.max(-32767,Math.min(32767,Math.round(sample*32767))),true)
+  }
+  return URL.createObjectURL(new Blob([buffer],{type:"audio/wav"}))
+}
+function getMediaPlayer(kind){
+  if(!mediaClips[kind]){
+    const Player=window.Audio;
+    const player=Player?new Player():document.createElement("audio");
+    if(!player)return null;
+    mediaUrls[kind]=makeWav(kind);
+    player.src=mediaUrls[kind];player.preload="auto";player.volume=1;
+    mediaClips[kind]=player
+  }
+  return mediaClips[kind]
+}
+function mediaCue(kind){
+  try{
+    const player=getMediaPlayer(kind);
+    if(!player||!player.play){audioNoticeText("Alternate audio is unavailable on this device.");return false}
+    player.pause?.();
+    try{player.currentTime=0}catch{}
+    const promise=player.play();
+    if(promise&&typeof promise.catch==="function")promise.catch(()=>{
+      audioNoticeText("iPhone blocked playback. Check media volume and Silent Mode, then try Test sound.")
+    });
+    return true
+  }catch(e){audioNoticeText("Alternate audio failed. Check Silent Mode or try Standard audio.");return false}
+}
 function enableAudio(){
   if(muted)return;
-  try{
-    const Ctx=window.AudioContext||window.webkitAudioContext;
-    if(!Ctx)return;
-    if(!audio)audio=new Ctx();
-    if(audio.state==="suspended")audio.resume()?.catch?.(()=>{});
-  }catch{audio=null}
-}
-function tone(freq=740,duration=.12,delay=0){
-  if(muted||!audio||document.hidden)return;
-  try{
-    const at=audio.currentTime+delay,osc=audio.createOscillator(),gain=audio.createGain();
-    osc.type="triangle";osc.frequency.value=freq;
-    gain.gain.setValueAtTime(.0001,at);
-    gain.gain.exponentialRampToValueAtTime(.16,at+.018);
-    gain.gain.exponentialRampToValueAtTime(.0001,at+duration);
-    osc.connect(gain);gain.connect(audio.destination);
-    osc.start(at);osc.stop(at+duration+.02)
-  }catch{}
+  if(audioMode==="web")primeWebAudio()
+  else{
+    // Media playback is primed on the user's Start/Test click for later timer cues.
+    try{getMediaPlayer("tick")}catch{}
+  }
 }
 function cue(kind){
-  if(kind==="go"){tone(990,.26);tone(1320,.32,.16)}
-  else if(kind==="done"){tone(990,.18);tone(880,.18,.25);tone(660,.4,.5)}
-  else if(kind==="rest")tone(540,.22);
-  else tone(820,.13);
+  if(muted||document.hidden)return;
+  if(audioMode==="media")mediaCue(kind);
+  else if(!webCue(kind))audioNoticeText("No Web Audio output. Tap Try alternate audio.");
   try{if(kind==="done"&&navigator.vibrate)navigator.vibrate([130,80,200])}catch{}
 }
+function testSound(){
+  if(muted){
+    audioNoticeText("Sound is off. Tap Sound off to enable it, then Test sound.");
+    return
+  }
+  if(audioMode==="web"&&audio&&audio.state!=="running")retireWebAudio();
+  audioNoticeText(audioMode==="media"?"Playing alternate test beep…":"Playing standard test beep…");
+  enableAudio();
+  cue("go")
+}
+function toggleAudioMode(){
+  audioMode=audioMode==="web"?"media":"web";
+  try{localStorage.setItem("hforgeTimerAudioModeV1",audioMode)}catch{}
+  audioNoticeText(audioMode==="media"?"Alternate audio selected. Testing beep…":"Standard audio selected. Testing beep…");
+  if(!muted)testSound();
+  else audioNoticeText("Sound is off. Enable Sound, then tap Test sound.");
+  render()
+}
+
 function runTick(){
   if(state==="prep"){
     let e=elapsed(),left=config.prep*1000-e;
@@ -166,6 +300,8 @@ function render(){
   $("wodFinish").disabled=mode!=="fortime"||!(state==="running"||(state==="paused"&&pausedFrom==="running"));
   $("wodSound").textContent=muted?"Sound off":"Sound on";
   $("wodSound").setAttribute("aria-pressed",String(!muted));
+  $("wodAudioMode").textContent=audioMode==="web"?"Try alternate audio":"Use standard audio";
+  $("wodAudioMode").setAttribute("aria-pressed",String(audioMode==="media"));
   $("wodFocus").textContent=focus?"Exit focus":"Focus mode";
   $("view-timer").classList.toggle("wod-focus",focus);
   document.body.classList.toggle("wod-focus-active",focus);
@@ -201,7 +337,8 @@ function start(){
   config=next;carried=0;anchor=now();rounds=0;reps=0;pausedFrom=null;
   lastIntervalKey=null;lastCountdown=null;finishReason="";
   enableAudio();state=config.prep>0?"prep":"running";
-  if(state==="running")cue("go");
+  // Prime iPhone audio during the user click, not on the first delayed interval.
+  cue(state==="running"?"go":"tick");
   setStatus(state==="prep"?"Get ready…":"Workout running");
   startTicker();runTick();return true
 }
@@ -226,13 +363,15 @@ function adjust(kind,delta){
   render()
 }
 function toggleFocus(){focus=!focus;render();if(focus)$("view-timer").scrollTo?.({top:0})}
-function toggleSound(){muted=!muted;if(!muted)enableAudio();render()}
+function toggleSound(){muted=!muted;render();if(!muted)testSound();else audioNoticeText("Sound muted. Tap Sound off to enable it.")}
 $("wodStart").addEventListener("click",start);
 $("wodPause").addEventListener("click",pauseOrResume);
 $("wodReset").addEventListener("click",reset);
 $("wodFinish").addEventListener("click",finish);
 $("wodFocus").addEventListener("click",toggleFocus);
 $("wodSound").addEventListener("click",toggleSound);
+$("wodTestSound").addEventListener("click",testSound);
+$("wodAudioMode").addEventListener("click",toggleAudioMode);
 $("wodRoundMinus").addEventListener("click",()=>adjust("rounds",-1));
 $("wodRoundPlus").addEventListener("click",()=>adjust("rounds",1));
 $("wodRepMinus").addEventListener("click",()=>adjust("reps",-1));
@@ -241,12 +380,13 @@ document.querySelectorAll("[data-wod-mode]").forEach(button=>
   button.addEventListener("click",()=>chooseMode(button.dataset.wodMode))
 );
 document.querySelectorAll(".wod-config-input").forEach(input=>input.addEventListener("change",()=>{if(state==="idle"||state==="finished")render()}));
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)runTick()});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){if(audioMode==="web"&&audio&&audio.state!=="running")audioNoticeText("Audio may have been interrupted. Tap Test sound to re-enable.");runTick()}});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&focus){focus=false;render()}});
 window.HForgeTimer={
  reset,stop:reset,selectMode:chooseMode,start,pauseOrResume,finish,tick:runTick,
- getSnapshot:()=>({mode,state,config,elapsedMs:elapsed(),rounds,reps,muted,focus,phase:metrics(state==="prep"?0:elapsed(),config||getPreviewConfig()).stage}),
+ getSnapshot:()=>({mode,state,config,elapsedMs:elapsed(),rounds,reps,muted,focus,audioMode,audioState:audio?.state||"none",phase:metrics(state==="prep"?0:elapsed(),config||getPreviewConfig()).stage}),
  adjust
 };
+audioNoticeText(audioNotice);
 render()
 })();
