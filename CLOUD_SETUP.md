@@ -34,6 +34,14 @@ Do not add a billing account or upgrade to Blaze. Do not enable SMS/Phone auth, 
 - Google sign-in uses the Firebase project's existing free **Spark** Authentication provider. Never upgrade to Identity Platform or Blaze solely for this feature.
 - Test on iPhone and other devices before broad use.
 
+## Facebook sign-in — integration built, provider setup required
+
+**Current state:** Firebase project's Facebook provider is **not enabled** as of November 26, 2026. To avoid a broken sign-in, Facebook buttons are marked `setup pending` and disabled via `window.HFORGE_FACEBOOK_READY = false` in `firebase-config.js`.
+
+- For the exact Meta Developer / Firebase Console setup and launch checklist, see [FACEBOOK_SETUP.md](./FACEBOOK_SETUP.md).
+- The app code already supports Facebook popup sign-in and **Link Facebook account**, preserving the original Firebase UID and existing PRs.
+- Enable the public switch only after the Meta app is live, Firebase Facebook provider enabled, and OAuth/authorized-domain settings have been verified.
+
 ## How accounts work
 
 - **Settings → Account & Cloud Sync**: create an account or sign in using email and password.
