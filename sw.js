@@ -1,5 +1,5 @@
-const CACHE="crossfit-tools-v9";
-const ASSETS=["./","./index.html","./manifest.webmanifest?v=4","./assets/icon-192.png?v=4","./assets/icon-512.png?v=4","./apple-touch-icon.png?v=4","./favicon-32.png?v=4","./favicon.ico?v=4"];
+const CACHE="h-forge-v10";
+const ASSETS=["./","./index.html","./manifest.webmanifest?v=10","./assets/icon-192.png?v=4","./assets/icon-512.png?v=4","./apple-touch-icon.png?v=4","./favicon-32.png?v=4","./favicon.ico?v=4"];
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
   self.skipWaiting()
