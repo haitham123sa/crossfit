@@ -426,14 +426,14 @@ body.wod-focus-active{overflow:hidden}
     <div class="wod-alt-controls">
       <button type="button" id="wodFocus" class="secondary">Focus mode</button>
       <button type="button" id="wodSound" class="secondary" aria-pressed="true">Sound on</button>
-      <button type="button" id="wodTestSound" class="secondary wod-audio-test" aria-label="Play a test beep">🔊 Test sound</button>
+      <button type="button" id="wodTestSound" class="secondary wod-audio-test" aria-label="Play a weightlifting competition clock buzzer">🔊 Test buzzer</button>
     </div>
     <div class="wod-audio-row">
       <button type="button" id="wodAudioMode" class="secondary" aria-pressed="false">Try alternate audio</button>
-      <p id="wodAudioStatus" class="note" role="status" aria-live="polite">Tap Test sound before your workout. If silent, try alternate audio.</p>
+      <p id="wodAudioStatus" class="note" role="status" aria-live="polite">Tap Test buzzer before your workout. If silent, try alternate audio.</p>
     </div>
     <p id="wodMessage" class="note" role="status" aria-live="polite">Ready for your workout.</p>
-    <p class="note wod-disclaimer">Timer sounds work while H-FORGE is active. On iPhone, check media volume and Silent Mode. Some Home Screen apps have an iOS audio playback issue; try Test sound in Safari if both modes are silent.</p>
+    <p class="note wod-disclaimer">Original competition-style buzzer signals at 90 seconds, 30 seconds and finish on timed WODs. This is not an official IWF recording. On iPhone, check media volume and Silent Mode; if silent in the Home Screen app, try Test buzzer in Safari.</p>
   </div>
 </section>
 
@@ -838,7 +838,7 @@ window.HForgeApp={
 initMovementSelects();renderApp();showView("barbell");
 </script>
 <script src="./firebase-config.js?v=14"></script>
-<script src="./wod-timer.js?v=18"></script>
+<script src="./wod-timer.js?v=19"></script>
 <script src="./cloud.js?v=16"></script>
 <script>
 // Keep the page at 100% size in the installed iPhone app and Safari.
