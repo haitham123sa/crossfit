@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<link rel="icon" href="./favicon-32.png?v=4" type="image/png">
+<title>Delete Your Data · H-FORGE</title><meta name="description" content="How to delete H-FORGE account and training records."><style>
+:root{color-scheme:dark;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#090a0c;color:#f0f1f4}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse 70% 25% at 50% 0,#431b23,transparent),#090a0c}
+main{max-width:740px;margin:0 auto;padding:36px 22px 80px;line-height:1.7}
+.logo{display:flex;align-items:center;gap:13px;text-decoration:none;color:#f7f7fa;font-weight:950;letter-spacing:.05em;font-size:26px}
+.logo img{width:47px;height:47px;border-radius:10px}.logo span{color:#f14e59}
+.kicker{margin-top:32px;color:#fb6973;font-weight:900;letter-spacing:.16em;font-size:12px}
+h1{font-size:clamp(30px,7vw,46px);line-height:1.1;letter-spacing:-.035em;margin:12px 0 20px}h2{font-size:19px;margin:29px 0 8px;color:#fff}
+p,li{color:#c9ccd4}a{color:#ff7e87;text-underline-offset:3px}
+.card{border:1px solid #3e4149;border-radius:15px;background:#1a1b20;padding:18px;margin-top:20px}
+small{color:#adb1bc}.footer{border-top:1px solid #33353a;margin-top:40px;padding-top:21px;color:#b9b9c0;font-size:12px}
+</style></head>
+<body><main>
+<a class="logo" href="./"><img src="./assets/icon-192.png?v=4" alt=""> H-<span>FORGE</span></a>
+<div class="kicker">ACCOUNT PRIVACY</div><h1>Delete your H-FORGE data</h1>
+<p>H-FORGE provides a self-service option to delete your account and associated cloud personal records. You do not need to contact Facebook or Google to erase H-FORGE's own cloud workout profile.</p>
+<div class="card"><h2>To delete your H-FORGE account</h2><ol>
+<li>Open <a href="./">H-FORGE</a> and sign in with the account you want to delete.</li>
+<li>Open <strong>Settings → Account & Cloud Sync</strong>.</li>
+<li>Optional: select <strong>Export Backup</strong> if you want to keep a copy of your PRs.</li>
+<li>Select <strong>Delete account & cloud PRs</strong>, accept the confirmation, and type <strong>DELETE</strong> when prompted.</li>
+<li>If Firebase says you need a recent sign-in, sign out, sign back in and repeat the deletion action. Check the on-screen status before leaving.</li>
+</ol></div>
+<h2>What is deleted</h2>
+<p>The deletion action attempts to remove (1) your H-FORGE Cloud Firestore profile, which includes PR history, unit preference and plate inventory, and (2) your H-FORGE Firebase Authentication user account. After both complete successfully, the matching user-profile cache on that device is cleared. Deletion is permanent and cannot be undone by H-FORGE.</p>
+<h2>What is not automatically deleted</h2>
+<p>Exported JSON backup files, guest-profile data, and local copies of account data stored on other browsers or devices are not remotely erased. Clear those copies from each device yourself. Your underlying Facebook or Google account is not deleted; only its connection to H-FORGE is removed when the H-FORGE account is deleted.</p>
+<h2>If deletion does not complete</h2>
+<p>Firebase may refuse to delete an account until you have recently authenticated. The app will show an error; if cloud PR records were removed but authentication remains active, it will retain your local cache and pause automatic syncing to avoid re-uploading the data. Sign out, sign in again, and retry deletion. Do not assume deletion succeeded unless the app has signed you out and confirms the deletion.</p>
+<h2>Facebook account removal</h2>
+<p>For a Facebook account, you may additionally remove H-FORGE's authorization through Facebook's <em>Settings & privacy → Settings → Apps and websites</em> controls. Disconnecting Facebook permissions alone does not delete H-FORGE's Firebase authentication record or workout data: use the steps above for data deletion.</p>
+<div class="footer"><a href="./">Return to H-FORGE</a> · <a href="./privacy.html">Privacy policy</a></div>
+</main></body></html>
