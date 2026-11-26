@@ -146,6 +146,19 @@ input::placeholder,textarea::placeholder{color:#737780}
 @media(min-width:650px){.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#prList{grid-template-columns:repeat(2,minmax(0,1fr))}.percent-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.barStage{height:250px}.plate.large{height:138px}.plate.red{width:35px}.plate.blue{width:33px}.plate.yellow{width:30px}.plate.green{width:28px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
 
+
+
+/* Cloud accounts are optional: the app stays completely functional without a backend. */
+.cloud-form{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+.cloud-form input{min-height:46px}
+.cloud-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.cloud-actions .secondary,.cloud-actions .primary{flex:1 1 120px}
+.cloud-account{font-weight:850;color:#f8f8fb;overflow-wrap:anywhere}
+.cloud-warning{padding:12px;margin-top:12px;border:1px solid #784547;background:#321c22;border-radius:12px}
+.cloud-warning strong{color:#ffd0d0}
+#cloudStatus,#cloudSyncStatus,#cloudError{line-height:1.55}
+#cloudError:not(:empty){color:#ff8b8e;margin-top:12px}
+
 </style>
 </head>
 <body>
@@ -241,6 +254,31 @@ input::placeholder,textarea::placeholder{color:#737780}
 
 <section id="view-settings" class="hidden">
   <div class="screen-intro"><div class="eyebrow">YOUR GEAR</div><h2>SETTINGS.</h2><p>One global unit. Your plates. Your data.</p></div>
+  <div class="card" id="cloudCard">
+    <span class="section-title"><span class="section-mark">☁</span> Account & Cloud Sync</span>
+    <p class="note" id="cloudStatus" role="status">Cloud accounts aren't connected yet. Local PRs and calculations still work.</p>
+    <div id="cloudAuthForm" class="hidden">
+      <div class="cloud-form">
+        <label><span class="section-title">Email address</span><input id="cloudEmailInput" class="input" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Account email"></label>
+        <label><span class="section-title">Password</span><input id="cloudPasswordInput" class="input" type="password" autocomplete="current-password" placeholder="At least 8 characters" aria-label="Account password"></label>
+      </div>
+      <div class="cloud-actions"><button type="button" class="primary" id="cloudSignIn">Sign in</button><button type="button" class="secondary" id="cloudSignUp">Create account</button><button type="button" class="secondary" id="cloudReset">Reset password</button></div>
+      <p class="note">Signing in keeps guest data separate. You can import existing PRs after signing in.</p>
+    </div>
+    <div id="cloudSignedIn" class="hidden">
+      <div class="cloud-account" id="cloudEmail"></div>
+      <p class="note" id="cloudSyncStatus" role="status">Connecting…</p>
+      <div class="cloud-actions"><button type="button" class="primary" id="cloudSyncNow">Sync now</button><button type="button" class="secondary" id="cloudImportDevice">Import device PRs</button><button type="button" class="secondary" id="cloudSignOut">Sign out</button></div>
+      <p class="note">Your guest records are kept separately. A copy of signed-in records also stays on this device for offline use.</p>
+    </div>
+    <div id="cloudConflict" class="cloud-warning hidden">
+      <strong>Cloud and device copies differ.</strong>
+      <p class="note">Choose which copy to use. Export a backup first if you want to keep both.</p>
+      <div class="cloud-actions"><button type="button" class="secondary" id="cloudUseCloud">Use cloud copy</button><button type="button" class="secondary" id="cloudKeepDevice">Replace cloud with device copy</button></div>
+    </div>
+    <p id="cloudError" class="note" role="alert" aria-live="polite"></p>
+  </div>
+
   <div class="card">
     <span class="section-title"><span class="section-mark">⚖</span> Global Units</span>
     <div class="row"><button class="choice settingUnit" data-unit="kg" aria-pressed="true">KG</button><button class="choice settingUnit" data-unit="lb" aria-pressed="false">LB</button></div>
@@ -278,13 +316,18 @@ const $=id=>document.getElementById(id),fmt=n=>Number.isInteger(Number(n))?Strin
 function convert(v,from,to){if(from===to)return Number(v);return from==="lb"?Number(v)/LB_PER_KG:Number(v)*LB_PER_KG}
 function defaultInventory(){const out={lb:{},kg:{}};["lb","kg"].forEach(u=>plateData[u].plates.forEach(p=>out[u][p.weight]=10));return out}
 function defaultState(){return{preferredUnit:"kg",inventory:defaultInventory(),prs:[]}}
+let storageScope=null;
 let state=loadState();
 function normalizeState(input){
   const s=input&&typeof input==="object"?input:{},d=defaultState();
   return{...d,...s,preferredUnit:s.preferredUnit==="lb"?"lb":"kg",inventory:{lb:{...d.inventory.lb,...(s.inventory?.lb||{})},kg:{...d.inventory.kg,...(s.inventory?.kg||{})}},prs:Array.isArray(s.prs)?s.prs:[]}
 }
-function loadState(){try{return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)))}catch{return defaultState()}}
-function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function activeStorageKey(){return storageScope===null?STORAGE_KEY:"hforgeUserDataV1:"+storageScope}
+function loadState(){try{return normalizeState(JSON.parse(localStorage.getItem(activeStorageKey())))}catch{return defaultState()}}
+function saveState(silent=false){
+  localStorage.setItem(activeStorageKey(),JSON.stringify(state));
+  if(storageScope&&!silent)window.dispatchEvent(new CustomEvent("hforge:data-changed",{detail:{uid:storageScope}}))
+}
 function meta(unit,w){return plateData[unit].plates.find(p=>p.weight===Number(w))}
 function stack(ps,u){return ps.map(w=>{const p=meta(u,w),label=`${fmt(w)} ${u} plate`;return `<div class="plate ${p.size} ${p.color}" role="img" aria-label="${label}" title="${label}"><span class="plate-label" aria-hidden="true">${fmt(w)}</span></div>`}).join("")}
 function usedPairs(arr){const c={};arr.forEach(w=>c[w]=(c[w]||0)+1);return c}
@@ -557,8 +600,36 @@ $("exportData").onclick=()=>{
 };
 $("importData").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const imported=JSON.parse(await f.text());if(!imported||typeof imported!=="object"||Array.isArray(imported))throw new Error("Invalid backup");state=normalizeState(imported);saveState();buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];prEditor=null;["targetWeight","pctBaseWeight"].forEach(id=>$(id).value="");renderApp(false);alert("Backup imported.")}catch{alert("Could not import this backup file.")}});
 
+/* A separate guest profile avoids merging one person's PRs into another account. */
+function switchHForgeProfile(uid){
+  storageScope=uid||null;
+  state=loadState();
+  buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];prEditor=null;
+  $("targetWeight").value="";$("pctBaseWeight").value="";
+  renderApp(false)
+}
+function applyHForgeCloudData(data){
+  state=normalizeState(data);
+  saveState(true);
+  buildBar=reverseBar=buildTarget=null;buildLoaded=[];buildHistory=[];prEditor=null;
+  $("targetWeight").value="";$("pctBaseWeight").value="";
+  renderApp(false)
+}
+function safeGuestState(){
+  try{return normalizeState(JSON.parse(localStorage.getItem(STORAGE_KEY)))}catch{return defaultState()}
+}
+window.HForgeApp={
+  getState:()=>JSON.parse(JSON.stringify({preferredUnit:state.preferredUnit,inventory:state.inventory,prs:state.prs})),
+  getGuestState:safeGuestState,
+  hasAccountCache:uid=>localStorage.getItem("hforgeUserDataV1:"+uid)!==null,
+  switchProfile:switchHForgeProfile,
+  applyCloudData:applyHForgeCloudData,
+  activeUser:()=>storageScope
+};
 initMovementSelects();renderApp();showView("barbell");
 </script>
+<script src="./firebase-config.js?v=13"></script>
+<script src="./cloud.js?v=13"></script>
 <script>
 // Keep the page at 100% size in the installed iPhone app and Safari.
 // CSS permits normal one-finger panning; these handlers cover legacy WebKit pinch gestures.
