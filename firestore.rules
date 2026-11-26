@@ -20,7 +20,7 @@ service cloud.firestore {
         && p.data.inventory.keys().hasAll(['kg', 'lb'])
         && p.data.inventory.kg is map
         && p.data.inventory.lb is map
-        && p.data.prs is list && p.data.prs.size() <= 500;
+        && p.data.prs is list;
     }
     match /profiles/{uid} {
       allow get: if owns(uid);
