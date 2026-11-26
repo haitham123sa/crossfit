@@ -259,21 +259,21 @@ function runTick(){
   if(state==="running"){
     const m=metrics(elapsed(),config);
     const remaining=m.total===null?null:Math.max(0,m.total-elapsed());
-    // Adapt IWF-style 90s / 30s warnings to finite WOD clocks.
-    // Never play overlapping warning + finish buzzers after a delayed background tick.
+    // Use competition-style 90s / 30s / finish signals on finite WODs.
+    // A late tick may skip both warning thresholds: play only the most urgent one.
+    let warningPlayed=false;
     if(!m.done&&remaining!==null){
-      if(!warned90&&m.total>=120000&&remaining<=90000){
-        warned90=true;cue("warning")
-      }
       if(!warned30&&m.total>=60000&&remaining<=30000){
-        warned30=true;cue("warning")
+        warned30=warned90=true;cue("warning");warningPlayed=true
+      }else if(!warned90&&m.total>=120000&&remaining<=90000){
+        warned90=true;cue("warning");warningPlayed=true
       }
     }
     if(m.done){
       carried=m.total;state="finished";finishReason=mode==="fortime"?"cap":"complete";
       stopTicker();cue("done")
     }else if(m.key!==lastIntervalKey){
-      if(lastIntervalKey!==null)cue(m.stage==="REST"?"rest":"go");
+      if(lastIntervalKey!==null&&!warningPlayed)cue(m.stage==="REST"?"rest":"go");
       lastIntervalKey=m.key
     }
   }
