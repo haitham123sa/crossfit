@@ -172,13 +172,6 @@ input::placeholder,textarea::placeholder{color:#737780}
 .account-delete-button{padding:12px 15px;border-radius:11px;border:1px solid #e0656b;background:#381c20;color:#ffd7db;font-size:12px;font-weight:850;margin-top:12px}
 .account-delete-button:disabled{opacity:.55}
 
-.facebook-signin-btn,.facebook-link-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-width:0;min-height:49px;margin-top:10px;padding:10px 14px;background:#1877f2;color:#fff;border:1px solid #2368bb;border-radius:12px;font-size:14px;font-weight:850;text-align:center;touch-action:manipulation}
-.facebook-signin-btn:disabled,.facebook-link-btn:disabled{background:#283241;border-color:#404956;color:#d2d6dd;opacity:.7;cursor:not-allowed}
-.facebook-signin-btn:focus-visible,.facebook-link-btn:focus-visible{outline:3px solid #f24950;outline-offset:3px}
-.facebook-f{display:inline-grid;place-items:center;width:23px;height:23px;flex:none;border-radius:50%;background:#fff;color:#1877f2;font:bold 20px/1 Arial,sans-serif;padding-top:3px}
-#cloudFacebookAvailability{margin:8px 0 0;font-size:12px;line-height:1.45}
-.cloud-google-link .facebook-link-btn{min-height:44px;margin-top:0}
-#authGate .facebook-signin-btn{max-width:100%}
 #authGate .google-signin-btn{width:100%;min-width:0}
 #cloudStatus,#cloudSyncStatus,#cloudError{line-height:1.55}
 #cloudError:not(:empty){color:#ff8b8e;margin-top:12px}
@@ -288,12 +281,7 @@ body.wod-focus-active{overflow:hidden}
         <span class="google-g" aria-hidden="true">G</span>
         <span>Continue with Google</span>
       </button>
-      <button type="button" id="cloudFacebookSignIn" class="facebook-signin-btn" disabled aria-label="Facebook sign-in setup pending">
-        <span class="facebook-f" aria-hidden="true">f</span>
-        <span id="cloudFacebookSignInText">Facebook sign-in · setup pending</span>
-      </button>
-      <p class="note" id="cloudFacebookAvailability" role="status">Facebook login is being configured; Google and email sign-in still work.</p>
-      <p class="note">Already have an H-FORGE account? Sign in with your existing method first, then link another provider in Settings to keep your PRs.</p>
+      <p class="note">Already have an H-FORGE email/password account? Sign in with it first, then link Google in Settings to keep your PRs.</p>
     </div>
     <div id="cloudSignedIn" class="hidden">
       <div class="cloud-account" id="cloudEmail"></div>
@@ -304,12 +292,6 @@ body.wod-focus-active{overflow:hidden}
           <span class="google-g" aria-hidden="true">G</span> Link Google account
         </button>
         <p id="cloudGoogleLinkStatus" class="note" role="status">Link Google to this account to keep your existing PRs when signing in with Google.</p>
-      </div>
-      <div id="cloudFacebookLinkSection" class="cloud-google-link hidden">
-        <button type="button" id="cloudLinkFacebook" class="facebook-link-btn" disabled>
-          <span class="facebook-f" aria-hidden="true">f</span> Link Facebook account
-        </button>
-        <p id="cloudFacebookLinkStatus" class="note" role="status">Link Facebook to this H-FORGE account without changing your PR history.</p>
       </div>
       <p class="note">Your guest records are kept separately. A copy of signed-in records also stays on this device for offline use.</p>
       <div class="account-privacy-zone">
@@ -896,9 +878,9 @@ window.HForgeApp={
 };
 initMovementSelects();renderApp();showView("barbell");
 </script>
-<script src="./firebase-config.js?v=21"></script>
+<script src="./firebase-config.js?v=23"></script>
 <script src="./wod-timer.js?v=19"></script>
-<script src="./cloud.js?v=22"></script>
+<script src="./cloud.js?v=23"></script>
 <script>
 // Keep the page at 100% size in the installed iPhone app and Safari.
 // CSS permits normal one-finger panning; these handlers cover legacy WebKit pinch gestures.
