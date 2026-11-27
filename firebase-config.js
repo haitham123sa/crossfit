@@ -5,6 +5,3 @@ window.HFORGE_FIREBASE_CONFIG = {
   "projectId": "h-forge",
   "appId": "1:272488576119:web:89169edef05248876b0272"
 };
-
-// Keep Facebook disabled until Meta App ID/Secret, Firebase provider and OAuth URI are configured.
-window.HFORGE_FACEBOOK_READY = false;
