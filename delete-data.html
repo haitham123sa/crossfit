@@ -17,7 +17,7 @@ small{color:#adb1bc}.footer{border-top:1px solid #33353a;margin-top:40px;padding
 <body><main>
 <a class="logo" href="./"><img src="./assets/icon-192.png?v=4" alt=""> H-<span>FORGE</span></a>
 <div class="kicker">ACCOUNT PRIVACY</div><h1>Delete your H-FORGE data</h1>
-<p>H-FORGE provides a self-service option to delete your account and associated cloud personal records. You do not need to contact Facebook or Google to erase H-FORGE's own cloud workout profile.</p>
+<p>H-FORGE provides a self-service option to delete your account and associated cloud personal records. You can erase H-FORGE's own cloud workout profile directly within the app.</p>
 <div class="card"><h2>To delete your H-FORGE account</h2><ol>
 <li>Open <a href="./">H-FORGE</a> and sign in with the account you want to delete.</li>
 <li>Open <strong>Settings → Account & Cloud Sync</strong>.</li>
@@ -28,10 +28,8 @@ small{color:#adb1bc}.footer{border-top:1px solid #33353a;margin-top:40px;padding
 <h2>What is deleted</h2>
 <p>The deletion action attempts to remove (1) your H-FORGE Cloud Firestore profile, which includes PR history, unit preference and plate inventory, and (2) your H-FORGE Firebase Authentication user account. After both complete successfully, the matching user-profile cache on that device is cleared. Deletion is permanent and cannot be undone by H-FORGE.</p>
 <h2>What is not automatically deleted</h2>
-<p>Exported JSON backup files, guest-profile data, and local copies of account data stored on other browsers or devices are not remotely erased. Clear those copies from each device yourself. Your underlying Facebook or Google account is not deleted; only its connection to H-FORGE is removed when the H-FORGE account is deleted.</p>
+<p>Exported JSON backup files, guest-profile data, and local copies of account data stored on other browsers or devices are not remotely erased. Clear those copies from each device yourself. Your underlying Google account is not deleted; its connection to H-FORGE is removed when the H-FORGE account is deleted.</p>
 <h2>If deletion does not complete</h2>
 <p>Firebase may refuse to delete an account until you have recently authenticated. The app will show an error; if cloud PR records were removed but authentication remains active, it will retain your local cache and pause automatic syncing to avoid re-uploading the data. Sign out, sign in again, and retry deletion. Do not assume deletion succeeded unless the app has signed you out and confirms the deletion.</p>
-<h2>Facebook account removal</h2>
-<p>For a Facebook account, you may additionally remove H-FORGE's authorization through Facebook's <em>Settings & privacy → Settings → Apps and websites</em> controls. Disconnecting Facebook permissions alone does not delete H-FORGE's Firebase authentication record or workout data: use the steps above for data deletion.</p>
 <div class="footer"><a href="./">Return to H-FORGE</a> · <a href="./privacy.html">Privacy policy</a></div>
 </main></body></html>
