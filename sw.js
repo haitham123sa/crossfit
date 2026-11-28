@@ -1,5 +1,5 @@
-const CACHE="h-forge-v23";
-const ASSETS=["./","./index.html","./firebase-config.js?v=23","./cloud.js?v=23","./wod-timer.js?v=19","./manifest.webmanifest?v=10","./privacy.html","./delete-data.html","./assets/icon-192.png?v=4","./assets/icon-512.png?v=4","./apple-touch-icon.png?v=4","./favicon-32.png?v=4","./favicon.ico?v=4"];
+const CACHE="h-forge-v24";
+const ASSETS=["./","./index.html","./firebase-config.js?v=24","./cloud.js?v=24","./wod-timer.js?v=19","./manifest.webmanifest?v=10","./about.html","./privacy.html","./delete-data.html","./assets/icon-192.png?v=4","./assets/icon-512.png?v=4","./apple-touch-icon.png?v=4","./favicon-32.png?v=4","./favicon.ico?v=4"];
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
   self.skipWaiting()
